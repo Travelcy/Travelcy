@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "82014576382",
+    "firebase_url": "https://travelcy-fd5af.firebaseio.com",
+    "project_id": "travelcy-fd5af",
+    "storage_bucket": "travelcy-fd5af.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82014576382:android:d691a9acab98bfab474faf",
+        "android_client_info": {
+          "package_name": "com.travelcy.travelcy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82014576382-9khmtvkrr95htj3pdn0etdscqeovfsvv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEXd6LoOzSyczqVtthufWnDvx7FmUsNNM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82014576382-9khmtvkrr95htj3pdn0etdscqeovfsvv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
