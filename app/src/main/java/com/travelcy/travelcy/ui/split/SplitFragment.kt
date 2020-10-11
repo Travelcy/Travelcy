@@ -1,4 +1,4 @@
-package com.travelcy.travelcy.ui.home
+package com.travelcy.travelcy.ui.split
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,20 +10,20 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.travelcy.travelcy.R
 
-class HomeFragment : Fragment() {
+class SplitFragment : Fragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var splitViewModel: SplitViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
-                ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
+        splitViewModel =
+                ViewModelProviders.of(this).get(SplitViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_split, container, false)
+        val textView: TextView = root.findViewById(R.id.text_split)
+        splitViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         return root

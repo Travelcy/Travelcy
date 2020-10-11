@@ -1,13 +1,13 @@
-package com.travelcy.travelcy.ui.notifications
+package com.travelcy.travelcy.ui.convert
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class NotificationsViewModel : ViewModel() {
+class ConvertViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+        value = "This is the Convert Fragment"
     }
     val text: LiveData<String> = _text
 }

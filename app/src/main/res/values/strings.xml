@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Travelcy</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_convert">CONVERT</string>
+    <string name="title_split">SPLIT</string>
+    <string name="title_settings">SETTINGS</string>
 </resources>
