@@ -66,7 +66,10 @@ class CurrencyWebServiceTest {
 
         mockWebServer.enqueue(response)
         val currencyResponse = currencyWebService.getCurrencies("ISK").execute()
+
         val currencyWebServiceResponse = currencyResponse.body()
+
+        Assert.assertNotNull(currencyWebServiceResponse)
 
         Assert.assertEquals("ISK", currencyWebServiceResponse.base)
 
