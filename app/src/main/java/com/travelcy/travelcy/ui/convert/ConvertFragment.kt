@@ -8,10 +8,15 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.R
 
 class ConvertFragment : Fragment() {
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var convertViewModel: ConvertViewModel
 
     override fun onCreateView(
@@ -19,13 +24,27 @@ class ConvertFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+        firebaseAnalytics = Firebase.analytics
+
         convertViewModel =
                 ViewModelProviders.of(this).get(ConvertViewModel::class.java)
+
         val root = inflater.inflate(R.layout.fragment_convert, container, false)
         val textView: TextView = root.findViewById(R.id.text_convert)
+
         convertViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
+
         return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+            param(FirebaseAnalytics.Param.SCREEN_NAME, "Convert Screen")
+            param(FirebaseAnalytics.Param.SCREEN_CLASS, "ConvertFragment")
+        }
     }
 }
