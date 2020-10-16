@@ -20,6 +20,7 @@ jobs:
       - run: |
           echo "${{ secrets.GOOGLE_JSON_KEY }}" > api-google-key.json
           echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
+          cat api-google-key.json
       - name: Build Android
         env:
           ANDROID_PACKAGE_NAME: com.travelcy.travelcy
