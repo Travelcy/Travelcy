@@ -6,18 +6,52 @@
     android:layout_height="match_parent"
     tools:context=".ui.convert.ConvertFragment">
 
-    <TextView
-        android:id="@+id/text_convert"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textColor="@color/colorMainFont"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <EditText
+        android:id="@+id/from_amount"
+        android:layout_width="250dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="48dp"
+        android:ems="10"
+        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/to_amount"
+        android:layout_width="250"
+        android:layout_height="65"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_button" />
+
+    <Spinner
+        android:id="@+id/from_spinner"
+        android:layout_width="250"
+        android:layout_height="65"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/from_amount" />
+
+    <Spinner
+        android:id="@+id/to_spinner"
+        android:layout_width="250"
+        android:layout_height="65dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/to_amount" />
+
+    <Button
+        android:id="@+id/switch_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Button"
+        app:layout_constraintTop_toBottomOf="@+id/from_spinner"
+        tools:layout_editor_absoluteX="161dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
