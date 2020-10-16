@@ -39,3 +39,4 @@ fastlane/FastlaneRunner
 
 keystore
 private_key.pepk
+api-google-key.json
