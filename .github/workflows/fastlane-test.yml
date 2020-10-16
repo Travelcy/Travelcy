@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  deploy-beta:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
