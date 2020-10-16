@@ -19,8 +19,8 @@
 
     <EditText
         android:id="@+id/to_amount"
-        android:layout_width="250"
-        android:layout_height="65"
+        android:layout_width="250dp"
+        android:layout_height="65dp"
         android:layout_marginTop="20dp"
         android:ems="10"
         android:inputType="number"
@@ -30,8 +30,8 @@
 
     <Spinner
         android:id="@+id/from_spinner"
-        android:layout_width="250"
-        android:layout_height="65"
+        android:layout_width="250dp"
+        android:layout_height="65dp"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,7 +39,7 @@
 
     <Spinner
         android:id="@+id/to_spinner"
-        android:layout_width="250"
+        android:layout_width="250dp"
         android:layout_height="65dp"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -51,7 +51,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Button"
-        app:layout_constraintTop_toBottomOf="@+id/from_spinner"
-        tools:layout_editor_absoluteX="161dp" />
+        android:text="Switch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/from_spinner" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.travelcy.travelcy.R
+import kotlinx.android.synthetic.main.fragment_convert.*
+import kotlinx.android.synthetic.main.fragment_convert.view.*
 
 class ConvertFragment : Fragment() {
 
@@ -22,10 +24,11 @@ class ConvertFragment : Fragment() {
         convertViewModel =
                 ViewModelProviders.of(this).get(ConvertViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_convert, container, false)
-        val textView: TextView = root.findViewById(R.id.text_convert)
-        convertViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+
+        root.switch_button.setOnClickListener { root ->
+            switch_button.setText("pressed")
+        }
+
         return root
     }
 }
