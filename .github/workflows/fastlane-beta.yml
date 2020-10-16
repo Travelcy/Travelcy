@@ -19,7 +19,8 @@ jobs:
           node-version: '12'
       - run: |
           echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
-          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > app/android.keystore
+          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
+          cp android.keystore app/
       - name: Build Android
         env:
           ANDROID_PACKAGE_NAME: com.travelcy.travelcy
