@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -21,12 +22,6 @@ import com.travelcy.travelcy.model.Currency
 
 class ConvertFragment : Fragment() {
 
-    val USD = Currency("USD",  listOf<Pair<String, Double>>(Pair("EUR", 1.123), Pair("ISK", 120.222)))
-    val EUR = Currency("EUR",  listOf<Pair<String, Double>>(Pair("USD", 0.877), Pair("ISK", 140.983)))
-    val ISK = Currency("ISK",  listOf<Pair<String, Double>>(Pair("EUR", 0.0014), Pair("USD", 0.0012)))
-
-    public val currencies = listOf<Currency>(USD,EUR,ISK)
-
     private lateinit var convertViewModel: ConvertViewModel
 
     private lateinit var binding: FragmentConvertBinding
@@ -40,44 +35,58 @@ class ConvertFragment : Fragment() {
                 ViewModelProviders.of(this).get(ConvertViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_convert, container, false)
 
-        convertViewModel.current_currencies.observe(this, Observer {
+        convertViewModel.from_currencies.observe(this, Observer {
 
         })
 
-        root.switch_button.setOnClickListener { root ->
-            switch_button.setText(convertViewModel.current_currencies.value!![1].name)}
 
-        val binding: FragmentConvertBinding = DataBindingUtil.inflate(
+        binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_convert,
             container,
             false
         )
-        val currNames = listCurrencies()
-        var fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, listCurrencies())
-        root.from_spinner.adapter = fromAA
 
-        /*
+        root.switch_button.setOnClickListener { root ->
+            switch_button.setText(convertViewModel.from_currencies.value!![1])}
+
         binding.switchButton.setOnClickListener{switch()}
 
-        fun changeButtonText(text: String){
-            switch_button.setText(text)
-    }
+        var fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
+        root.from_spinner.adapter = fromAA
 
-         */
+        var toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
+        root.to_spinner.adapter = toAA
+
+
+        root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                convertViewModel.setSelectedFromCurr(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                convertViewModel.setSelectedFromCurr(0)
+            }
+        }
+
+
+        root.to_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                convertViewModel.setSelectedToCurr(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                convertViewModel.setSelectedToCurr(0)
+            }
+        }
 
         return root
     }
-/*
-    private fun switch() {
+
+
+    private fun switch(){
         convertViewModel.switch()
     }
- */
-    fun listCurrencies(): MutableList<String> {
-        var currencyNames = mutableListOf<String>()
-        for (curr in currencies){
-            currencyNames.add(curr.name)
-        }
-    return currencyNames
+
+    private fun populateToSpinner(){
+        //TODO: find out how to repopulate
     }
 }
