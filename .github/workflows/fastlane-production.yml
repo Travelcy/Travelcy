@@ -1,7 +1,6 @@
 name: fastlane-production
 
 on:
-  push:
   release:
     types: [published]
 
