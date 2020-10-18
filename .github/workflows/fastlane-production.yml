@@ -34,7 +34,7 @@ jobs:
           asset_content_type: application/pdf
   publish-user-guide:
     runs-on: ubuntu-latest
-    name: publish-operation-manual
+    name: publish-user-guide
     steps:
       - name: Checkout
         uses: actions/checkout@v2
