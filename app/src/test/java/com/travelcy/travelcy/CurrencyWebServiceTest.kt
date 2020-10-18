@@ -33,17 +33,6 @@ class CurrencyWebServiceTest {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
-        //
-        currencyWebService = retrofit.create(CurrencyWebService::class.java)
-    }
-
-    @After
-    fun teardown() {
-        mockWebServer.shutdown()
-    }
-
-    @Test
-    fun testCurrencyWebService() {
         val ratesJson = JSONObject()
             .put("CAD", 0.009546683)
             .put("ISK", 1.0)
@@ -65,16 +54,27 @@ class CurrencyWebServiceTest {
             .setBody(jsonResponse.toString())
 
         mockWebServer.enqueue(response)
+
+        currencyWebService = retrofit.create(CurrencyWebService::class.java)
+    }
+
+    @After
+    fun teardown() {
+        mockWebServer.shutdown()
+    }
+
+    @Test
+    fun testCurrencyWebService() {
         val currencyResponse = currencyWebService.getCurrencies("ISK").execute()
 
         val currencyWebServiceResponse = currencyResponse.body()
 
         Assert.assertNotNull(currencyWebServiceResponse)
 
-        Assert.assertEquals("ISK", currencyWebServiceResponse.base)
+        Assert.assertEquals("ISK", currencyWebServiceResponse?.base)
 
-        Assert.assertEquals("2020-10-09", currencyWebServiceResponse.date)
+        Assert.assertEquals("2020-10-09", currencyWebServiceResponse?.date)
 
-        Assert.assertEquals(0.007245086, currencyWebServiceResponse.rates.get("USD"))
+        Assert.assertEquals(0.007245086, currencyWebServiceResponse?.rates?.get("USD"))
     }
 }

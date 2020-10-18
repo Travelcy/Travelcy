@@ -11,8 +11,8 @@ import androidx.room.PrimaryKey
 ], indices = [Index("localCurrencyId", "foreignCurrencyId")]
 )
 data class Settings (
-    val localCurrencyId: String,
-    val foreignCurrencyId: String
+    val localCurrencyId: String?,
+    val foreignCurrencyId: String?
 ){
     // We only want one settings row since we can't have multiple users
     // By setting the id always as 1 we make sure there will never be more than 1 line

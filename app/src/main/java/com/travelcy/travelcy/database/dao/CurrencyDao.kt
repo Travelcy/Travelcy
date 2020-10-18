@@ -12,6 +12,9 @@ interface CurrencyDao {
     @Insert(onConflict = REPLACE)
     fun insertAll(currencies: List<Currency>)
 
+    @Query("SELECT COUNT(*) FROM currency")
+    fun hasCurrencies(): Boolean
+
     @Query("SELECT * FROM currency")
     fun loadCurrencies(): LiveData<List<Currency>>
 }
