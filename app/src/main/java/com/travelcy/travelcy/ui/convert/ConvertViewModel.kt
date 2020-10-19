@@ -9,8 +9,8 @@ import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.services.currency.CurrencyWebService
 
 class ConvertViewModel(private val currencyRepository: CurrencyRepository) : ViewModel() {
-    val currencies = currencyRepository.getCurrencies()
     val localCurrency = currencyRepository.getLocalCurrency()
+    val currencies = currencyRepository.getCurrencies()
     val foreignCurrency = currencyRepository.getForeignCurrency()
 
     fun switch(){
@@ -19,7 +19,6 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository) : Vie
 
     fun listFromCurrencies(): MutableList<String> {
         var currencyNames = mutableListOf<String>()
-        Log.d(currencies.value.toString(), "CURRENCIES: ")
         for (curr in currencies.value!!){
             currencyNames.add(curr.name)
         }

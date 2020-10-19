@@ -48,20 +48,18 @@ class ConvertFragment : Fragment() {
         )
 
         convertViewModel.currencies.observe(viewLifecycleOwner, Observer {
+            // Update UI
+            var fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
+            root.from_spinner.adapter = fromAA
 
+            var toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
+            root.to_spinner.adapter = toAA
         })
 
         root.switch_button.setOnClickListener {
             switch_button.text = convertViewModel.listFromCurrencies()[1]
         }
         binding.root.setOnClickListener{switch()}
-
-        var fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
-        root.from_spinner.adapter = fromAA
-
-        var toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
-        root.to_spinner.adapter = toAA
-
 
         root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
