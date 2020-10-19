@@ -1,67 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-<data>
-    <variable
-        name="ConvertViewModel"
-        type="com.travelcy.travelcy.ui.convert.ConvertViewModel" />
-</data>
+    <data>
+        <variable
+            name="ConvertViewModel"
+            type="com.travelcy.travelcy.ui.convert.ConvertViewModel" />
+    </data>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.convert.ConvertFragment">
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.convert.ConvertFragment">
 
-    <EditText
-        android:id="@+id/from_amount"
-        android:layout_width="250dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="48dp"
-        android:ems="10"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/from_amount"
+            android:layout_width="250dp"
+            android:layout_height="65dp"
+            android:layout_marginTop="48dp"
+            android:ems="10"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/to_amount"
-        android:layout_width="250dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switch_button" />
+        <EditText
+            android:id="@+id/to_amount"
+            android:layout_width="250dp"
+            android:layout_height="65dp"
+            android:layout_marginTop="20dp"
+            android:ems="10"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/switch_button" />
 
-    <Spinner
-        android:id="@+id/from_spinner"
-        android:layout_width="250dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/from_amount" />
+        <Spinner
+            android:id="@+id/from_spinner"
+            android:layout_width="250dp"
+            android:layout_height="65dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/from_amount" />
 
-    <Spinner
-        android:id="@+id/to_spinner"
-        android:layout_width="250dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/to_amount" />
+        <Spinner
+            android:id="@+id/to_spinner"
+            android:layout_width="250dp"
+            android:layout_height="65dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/to_amount" />
 
-    <Button
-        android:id="@+id/switch_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Switch"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/from_spinner" />
-</androidx.constraintlayout.widget.ConstraintLayout>
-
+        <Button
+            android:id="@+id/switch_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Switch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/from_spinner" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

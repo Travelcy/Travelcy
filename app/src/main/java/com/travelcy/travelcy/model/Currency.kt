@@ -1,6 +1,11 @@
 package com.travelcy.travelcy.model
 
-data class Currency constructor(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "currency")
+data class Currency(
+    @PrimaryKey val id: String,
     val name: String,
-    val rates: List<Pair<String, Double>>
+    val exchangeRate: Double
 )
