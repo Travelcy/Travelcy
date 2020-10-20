@@ -1,0 +1,34 @@
+name: fastlane-beta
+
+#on:
+#  release:
+#    types: [released]
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-beta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - run: |
+          echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
+          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
+          cp android.keystore app/
+      - name: Build Android
+        env:
+          ANDROID_PACKAGE_NAME: com.travelcy.travelcy
+          ANDROID_KEYSTORE: android.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        uses: maierj/fastlane-action@v1.4.0
+        with:
+          lane: 'android beta'
+          skip-tracking: true

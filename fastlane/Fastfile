@@ -1,0 +1,36 @@
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  lane :bump_version_code do
+      g = google_play_track_version_codes
+      gb = google_play_track_version_codes(track: 'beta')
+      ga = google_play_track_version_codes(track: 'alpha')
+      gi = google_play_track_version_codes(track: 'internal')
+      max_value = [g[0].to_i, gb[0].to_i, ga[0].to_i, gi[0].to_i].max
+      version_updated = max_value + 1
+      increment_version_code(
+        gradle_file_path: "app/build.gradle",
+        version_code: version_updated.to_i
+      )
+    end
+
+  lane :beta do
+    bump_version_code
+    gradle(
+      task: "clean assemble",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE"],
+        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+      }
+    )
+    upload_to_play_store(
+      track: 'internal',
+    )
+  end
+end

@@ -1,0 +1,22 @@
+name: fastlane-test
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - name: Run Tests
+        env:
+          ANDROID_PACKAGE_NAME: com.travelcy.travelcy
+        uses: maierj/fastlane-action@v1.4.0
+        with:
+          lane: 'android test'
+          skip-tracking: true
