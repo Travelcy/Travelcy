@@ -6,16 +6,24 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
 import com.travelcy.travelcy.model.Settings
-import com.travelcy.travelcy.database.entity.SettingsWithCurrencies
 
 @Dao
 interface SettingsDao {
     @Insert(onConflict = REPLACE)
     fun updateSettings(settings: Settings)
 
+    @Query("UPDATE settings set localCurrencyCode = :localCurrencyCode where id = 1")
+    fun updateLocalCurrencyCode(localCurrencyCode: String)
+
+    @Query("UPDATE settings set foreignCurrencyCode = :foreignCurrencyCode where id = 1")
+    fun updateForeignCurrencyCode(foreignCurrencyCode: String)
+
     @Query("SELECT COUNT(*) FROM settings where id = 1")
     fun hasSettings(): Boolean
 
     @Query("SELECT * FROM settings where id = 1")
-    fun getSettings(): LiveData<SettingsWithCurrencies>
+    fun getSettingsRaw(): Settings
+
+    @Query("SELECT * FROM settings where id = 1")
+    fun getSettings(): LiveData<Settings>
 }

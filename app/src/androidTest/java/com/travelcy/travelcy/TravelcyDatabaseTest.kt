@@ -107,9 +107,9 @@ class TravelcyDatabaseTest {
 
         Assert.assertNotNull(retrievedSettings)
 
-        Assert.assertEquals(retrievedSettings?.localCurrency?.id, "ISK")
+        Assert.assertEquals(retrievedSettings?.localCurrencyCode, "ISK")
 
-        Assert.assertEquals(retrievedSettings?.foreignCurrency?.id, "USD")
+        Assert.assertEquals(retrievedSettings?.foreignCurrencyCode, "USD")
     }
 
 
@@ -134,9 +134,9 @@ class TravelcyDatabaseTest {
 
         Assert.assertNotNull(retrievedSettings)
 
-        Assert.assertEquals(retrievedSettings?.localCurrency?.id, "USD")
+        Assert.assertEquals(retrievedSettings?.localCurrencyCode, "USD")
 
-        Assert.assertEquals(retrievedSettings?.foreignCurrency?.id, "ISK")
+        Assert.assertEquals(retrievedSettings?.foreignCurrencyCode, "ISK")
     }
 
 

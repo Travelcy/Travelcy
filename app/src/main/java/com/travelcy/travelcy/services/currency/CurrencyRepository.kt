@@ -1,10 +1,10 @@
 package com.travelcy.travelcy.services.currency
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
-import com.travelcy.travelcy.database.entity.SettingsWithCurrencies
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Settings
 import java.util.concurrent.Executor
@@ -15,113 +15,134 @@ class CurrencyRepository (
     private val settingsDao: SettingsDao,
     private val executor: Executor
 ) {
-    val settings: LiveData<SettingsWithCurrencies> = settingsDao.getSettings()
+    val settings: LiveData<Settings> = settingsDao.getSettings()
+    val currencies = currencyDao.loadCurrencies()
 
-    init {
-        updateCurrencies()
+    private val _localCurrencyCode: LiveData<String> = Transformations.map(settings) {
+        Log.d(TAG, "Settings changed, local currency code changed to ${it?.localCurrencyCode ?: "undefined"}")
+        it?.localCurrencyCode
     }
 
-    private fun initSettings(currencies: List<Currency>) {
-        if (!settingsDao.hasSettings() && currencies.isNotEmpty()) {
-            val iskCurrency = currencies.find { currency -> currency.id == "ISK" }
-            val usdCurrency = currencies.find { currency -> currency.id == "USD" }
+    private val localCurrencyCode = Transformations.distinctUntilChanged(_localCurrencyCode)
 
-            if (iskCurrency != null && usdCurrency != null) {
-                executor.execute {
-                    settingsDao.updateSettings(Settings(iskCurrency.id, usdCurrency.id))
-                }
+    private val _foreignCurrencyCode: LiveData<String> = Transformations.map(settings) {
+        Log.d(TAG, "Settings changed, foreign currency code changed to ${it?.foreignCurrencyCode ?: "undefined"}")
+        it?.foreignCurrencyCode
+    }
+
+    private val foreignCurrencyCode = Transformations.distinctUntilChanged(_foreignCurrencyCode)
+
+
+    val localCurrency = Transformations.switchMap(localCurrencyCode) {
+        currencyDao.getCurrency(it)
+    }
+
+    val foreignCurrency = Transformations.switchMap(foreignCurrencyCode) {
+        currencyDao.getCurrency(it)
+    }
+
+    init {
+        localCurrencyCode.observeForever {
+            updateCurrencies(it)
+        }
+
+        executor.execute {
+            if (!settingsDao.hasSettings()) {
+                Log.d(TAG, "No settings in database, setting up initial settings")
+                // Setup initial settings
+                updateSettings("ISK", "USD")
             }
         }
     }
 
-    fun getLocalCurrency(): LiveData<Currency> {
-       return Transformations.map(settings) {
-           it?.localCurrency
-       }
-    }
+    private fun updateSettings(localCurrencyId: String, foreignCurrencyId: String) {
+        Log.d(TAG, "updateSettings(localCurrencyId: $localCurrencyId, foreignCurrencyId: $foreignCurrencyId)")
 
-    fun getForeignCurrency(): LiveData<Currency> {
-        return Transformations.map(settings) {
-            it?.foreignCurrency
+        executor.execute {
+            settingsDao.updateSettings(Settings(localCurrencyId, foreignCurrencyId))
         }
     }
 
     fun switchCurrencies() {
-        val foreignCurrencyId = settings.value?.foreignCurrency?.id
-        val localCurrencyId = settings.value?.localCurrency?.id
+        val foreignCurrencyCodeValue = foreignCurrencyCode.value
+        val localCurrencyCodeValue = localCurrencyCode.value
 
-        if (foreignCurrencyId != null && localCurrencyId != null) {
-            executor.execute {
-                settingsDao.updateSettings(Settings(foreignCurrencyId, localCurrencyId))
-            }
+        if (foreignCurrencyCodeValue != null && localCurrencyCodeValue != null) {
+            Log.d(TAG, "Switching currencies from ${foreignCurrencyCodeValue} to ${localCurrencyCodeValue}")
+            updateSettings(foreignCurrencyCodeValue, localCurrencyCodeValue)
+        }
+        else {
+            Log.e(TAG, "Could not switch currencies, either foreignCurrency or localCurrency were not defined")
         }
     }
 
     fun changeLocalCurrency(currency: Currency) {
-        if (currency.id == settings.value?.localCurrency?.id) {
+        Log.d(TAG, "Changing local currency to ${currency.id}")
+
+        if (currency.id == localCurrency.value?.id) {
+            Log.d(TAG, "Local currency already set to value")
             return
         }
-        // If the foreign currency is the same as the local currency we turn them around
-        var foreignCurrencyId = settings.value?.foreignCurrency?.id
 
-        if (foreignCurrencyId == currency.id) {
-            foreignCurrencyId = settings.value?.localCurrency?.id
+        // If the foreign currency is the same as the local currency being set we turn them around
+        if (foreignCurrency.value?.id == currency.id) {
+            switchCurrencies()
         }
-
-        executor.execute {
-            settingsDao.updateSettings(Settings(currency.id, foreignCurrencyId))
+        else {
+            executor.execute {
+                settingsDao.updateLocalCurrencyCode(currency.id)
+            }
         }
     }
 
     fun changeForeignCurrency(currency: Currency) {
-        if (currency.id == settings.value?.foreignCurrency?.id) {
+        Log.d(TAG, "Changing foreign currency to ${currency.id}")
+
+        if (currency.id == foreignCurrency.value?.id) {
+            Log.d(TAG, "Foreign currency already set to value")
             return
         }
+
         // If the foreign currency is the same as the local currency we turn them around
-        var localCurrencyId = settings.value?.localCurrency?.id
-
-        if (localCurrencyId == currency.id) {
-            localCurrencyId = settings.value?.foreignCurrency?.id
+        if (localCurrency.value?.id == currency.id) {
+            switchCurrencies()
         }
-
-        executor.execute {
-            settingsDao.updateSettings(Settings(localCurrencyId, currency.id))
+        else {
+            executor.execute {
+                settingsDao.updateForeignCurrencyCode(currency.id)
+            }
         }
     }
 
-    fun getCurrencies(): LiveData<List<Currency>> {
-        updateCurrencies()
-        val data = currencyDao.loadCurrencies()
-        return data
-    }
-
-    fun updateCurrencies() {
+    private fun updateCurrencies(currencyBase: String) {
+        Log.d(TAG,"Update currencies (currencyBase: $currencyBase)")
         // Runs in background thread
         executor.execute {
-            if (!currencyDao.hasCurrencies()) {
-                val response = currencyWebService.getCurrencies("ISK").execute()
+            val response = currencyWebService.getCurrencies(currencyBase).execute()
 
-                if (response.isSuccessful) {
-                    val currencyWebServiceResponse = response.body()
+            if (response.isSuccessful) {
+                val currencyWebServiceResponse = response.body()
 
-                    val currencies = mutableListOf<Currency>()
-                    currencyWebServiceResponse?.rates?.forEach {
-                        val currency = java.util.Currency.getInstance(it.key)
+                val currencies = mutableListOf<Currency>()
+                currencyWebServiceResponse?.rates?.forEach {
+                    val currency = java.util.Currency.getInstance(it.key)
 
-                        currencies.add(
-                            Currency(
-                                it.key,
-                                currency.displayName,
-                                it.value
-                            )
+                    currencies.add(
+                        Currency(
+                            it.key,
+                            currency.displayName,
+                            it.value
                         )
-                    }
-
-                    currencyDao.insertAll(currencies)
-                    initSettings(currencies)
+                    )
                 }
+
+                Log.d(TAG,"Inserting new currencies ${currencies.size}")
+                currencyDao.insertAll(currencies)
             }
-        }.run {  }
+        }
     }
 
+    companion object {
+        private const val TAG = "CurrencyRepository"
+    }
 }

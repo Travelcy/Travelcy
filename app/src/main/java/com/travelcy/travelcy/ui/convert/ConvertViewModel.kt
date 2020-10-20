@@ -13,9 +13,9 @@ import java.text.DecimalFormat
 class ConvertViewModel(private val currencyRepository: CurrencyRepository) : ViewModel() {
     var toIndex = 0
 
-    val localCurrency = currencyRepository.getLocalCurrency()
-    val foreignCurrency = currencyRepository.getForeignCurrency()
-    private val currencies = currencyRepository.getCurrencies()
+    val localCurrency = currencyRepository.localCurrency
+    val foreignCurrency = currencyRepository.foreignCurrency
+    private val currencies = currencyRepository.currencies
 
     val currencyIds = Transformations.map(currencies) {
         it.map { currency ->
@@ -27,7 +27,7 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository) : Vie
 
     val toAmount: MediatorLiveData<Double> = MediatorLiveData<Double>().apply {
         addSource(foreignCurrency) {
-            value = it.exchangeRate * (fromAmount.value ?: 0.0)
+            value = (it?.exchangeRate ?: 0.0) * (fromAmount.value ?: 0.0)
         }
 
         addSource(fromAmount) {

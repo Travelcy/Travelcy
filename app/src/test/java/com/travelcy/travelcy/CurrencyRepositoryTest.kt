@@ -7,7 +7,6 @@ import androidx.lifecycle.Observer
 import com.google.gson.GsonBuilder
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
-import com.travelcy.travelcy.database.entity.SettingsWithCurrencies
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Settings
 import com.travelcy.travelcy.services.currency.CurrencyRepository
@@ -26,9 +25,24 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class CurrencyDaoMock: CurrencyDao {
+    private val currencies = arrayOf(
+        Currency("ISK", "Icelandic Króna", 1.0),
+        Currency("CAD", "Canadian dollar", 0.009546683),
+        Currency("DKK", "Danish krona", 0.0457137592),
+        Currency("SEK", "Swedish krona", 0.064004914),
+        Currency("EUR", "Euros", 0.0061425061),
+        Currency("NOK", "Norwegian crona", 0.0667217445),
+        Currency("USD", "US dollar", 0.007245086),
+        Currency("AUD", "Australian dollar", 0.0100767813)
+    ).toList()
 
     override fun insertAll(currencies: List<Currency>) {
        // Do nothing, were not testing the dao here
+    }
+
+    override fun getCurrency(currencyCode: String): LiveData<Currency> {
+        val currency = currencies.find {it.id == currencyCode}
+        return MutableLiveData<Currency>(currency)
     }
 
     override fun hasCurrencies(): Boolean {
@@ -36,33 +50,23 @@ class CurrencyDaoMock: CurrencyDao {
     }
 
     override fun loadCurrencies(): LiveData<List<Currency>> {
-        val currencies = arrayOf(
-            Currency("ISK", "Icelandic Króna", 1.0),
-            Currency("CAD", "Canadian dollar", 0.009546683),
-            Currency("DKK", "Danish krona", 0.0457137592),
-            Currency("SEK", "Swedish krona", 0.064004914),
-            Currency("EUR", "Euros", 0.0061425061),
-            Currency("NOK", "Norwegian crona", 0.0667217445),
-            Currency("USD", "US dollar", 0.007245086),
-            Currency("AUD", "Australian dollar", 0.0100767813)
-        ).toList()
-
-        val liveData = MutableLiveData<List<Currency>>()
-        liveData.value = currencies
-
-        return liveData
+        return MutableLiveData<List<Currency>>(currencies)
     }
 }
 
 class SettingsDaoMock: SettingsDao {
-    private val settingsWithCurrencies: MutableLiveData<SettingsWithCurrencies> = MutableLiveData()
+    private val _settings: MutableLiveData<Settings> = MutableLiveData()
 
     init {
-        updateSettings(Settings(localCurrencyId = "ISK", foreignCurrencyId = "USD"))
+        updateSettings(Settings("ISK", "USD"))
     }
 
     override fun hasSettings(): Boolean {
         return true
+    }
+
+    override fun getSettingsRaw(): Settings {
+        return _settings.value!!
     }
 
     private fun createCurrencyFromId(id: String?): Currency? {
@@ -80,15 +84,19 @@ class SettingsDaoMock: SettingsDao {
     }
 
     override fun updateSettings(settings: Settings) {
-        settingsWithCurrencies.postValue(SettingsWithCurrencies(
-            settings,
-            localCurrency =  createCurrencyFromId(settings.localCurrencyId),
-            foreignCurrency = createCurrencyFromId(settings.foreignCurrencyId)
-        ))
+        _settings.postValue(settings)
     }
 
-    override fun getSettings(): LiveData<SettingsWithCurrencies> {
-        return settingsWithCurrencies
+    override fun updateLocalCurrencyCode(localCurrencyCode: String) {
+        _settings.postValue(Settings(localCurrencyCode, _settings.value?.foreignCurrencyCode))
+    }
+
+    override fun updateForeignCurrencyCode(foreignCurrencyCode: String) {
+        _settings.postValue(Settings(_settings.value?.localCurrencyCode, foreignCurrencyCode))
+    }
+
+    override fun getSettings(): LiveData<Settings> {
+        return _settings
     }
 
 }
@@ -158,8 +166,8 @@ class CurrencyRepositoryTest {
 
     @Test
     fun testGetSettings() {
-        val localCurrency = currencyRepository.getLocalCurrency().blockingObserve()
-        val foreignCurrency = currencyRepository.getForeignCurrency().blockingObserve()
+        val localCurrency = currencyRepository.localCurrency.blockingObserve()
+        val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()
 
         Assert.assertEquals("ISK", localCurrency?.id)
         Assert.assertEquals("USD", foreignCurrency?.id)
@@ -167,19 +175,19 @@ class CurrencyRepositoryTest {
 
     @Test
     fun testChangeLocalCurrency() {
-        val localCurrencyBefore = currencyRepository.getLocalCurrency().blockingObserve()
-        val foreignCurrencyBefore = currencyRepository.getForeignCurrency().blockingObserve()
+        val localCurrencyBefore = currencyRepository.localCurrency.blockingObserve()
+        val foreignCurrencyBefore = currencyRepository.foreignCurrency.blockingObserve()
 
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
         currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!)
 
-        executorService.shutdown()
-        executorService.awaitTermination(10, TimeUnit.SECONDS)
+        // This is a hack since the currency repository is executing on a background thread
+        executorService.awaitTermination(1, TimeUnit.SECONDS)
 
-        val localCurrency = currencyRepository.getLocalCurrency().blockingObserve()
-        val foreignCurrency = currencyRepository.getForeignCurrency().blockingObserve()
+        val localCurrency = currencyRepository.localCurrency.blockingObserve()
+        val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()
 
         Assert.assertEquals("USD", localCurrency?.id)
         Assert.assertEquals("ISK", foreignCurrency?.id)
@@ -187,19 +195,19 @@ class CurrencyRepositoryTest {
 
     @Test
     fun testChangeForeignCurrency() {
-        val localCurrencyBefore = currencyRepository.getLocalCurrency().blockingObserve()
-        val foreignCurrencyBefore = currencyRepository.getForeignCurrency().blockingObserve()
+        val localCurrencyBefore = currencyRepository.localCurrency.blockingObserve()
+        val foreignCurrencyBefore = currencyRepository.foreignCurrency.blockingObserve()
 
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
         currencyRepository.changeForeignCurrency(localCurrencyBefore!!)
 
-        executorService.shutdown()
-        executorService.awaitTermination(10, TimeUnit.SECONDS)
+        // This is a hack since the currency repository is executing on a background thread
+        executorService.awaitTermination(1, TimeUnit.SECONDS)
 
-        val localCurrency = currencyRepository.getLocalCurrency().blockingObserve()
-        val foreignCurrency = currencyRepository.getForeignCurrency().blockingObserve()
+        val localCurrency = currencyRepository.localCurrency.blockingObserve()
+        val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()
 
         Assert.assertEquals("USD", localCurrency?.id)
         Assert.assertEquals("ISK", foreignCurrency?.id)
