@@ -73,6 +73,8 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
+    kapt 'com.android.databinding:compiler:3.1.4'
+
     // Testing dependencies
     testImplementation 'junit:junit:4.13'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.0'
