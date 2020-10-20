@@ -133,7 +133,7 @@ class ConvertFragment : Fragment() {
         }
 
         root.switch_button.setOnClickListener {
-
+            convertViewModel.switch()
         }
 
         binding.root.setOnClickListener{switch()}

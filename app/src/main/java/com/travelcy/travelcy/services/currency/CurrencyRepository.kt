@@ -46,6 +46,17 @@ class CurrencyRepository (
         }
     }
 
+    fun switchCurrencies() {
+        val foreignCurrencyId = settings.value?.foreignCurrency?.id
+        val localCurrencyId = settings.value?.localCurrency?.id
+
+        if (foreignCurrencyId != null && localCurrencyId != null) {
+            executor.execute {
+                settingsDao.updateSettings(Settings(foreignCurrencyId, localCurrencyId))
+            }
+        }
+    }
+
     fun changeLocalCurrency(currency: Currency) {
         if (currency.id == settings.value?.localCurrency?.id) {
             return

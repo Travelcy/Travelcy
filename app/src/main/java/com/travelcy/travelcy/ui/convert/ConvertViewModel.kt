@@ -36,7 +36,7 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository) : Vie
     }
 
     fun switch(){
-        // TODO: Switch currencies
+        currencyRepository.switchCurrencies()
     }
 
     fun setLocalCurrency(position:Int) {
