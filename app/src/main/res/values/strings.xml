@@ -4,4 +4,8 @@
     <string name="title_split">SPLIT</string>
     <string name="title_settings">SETTINGS</string>
     <string name="bill_total_amount">Total</string>
+    <string name="bill_item_description">Description</string>
+    <string name="bill_item_amount">Amount</string>
+    <string name="save">Save</string>
+    <string name="delete">delete</string>
 </resources>
