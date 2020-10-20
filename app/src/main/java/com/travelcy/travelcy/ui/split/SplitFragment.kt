@@ -8,8 +8,10 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -69,15 +71,23 @@ class SplitFragment : Fragment() {
         for (billItem in billItems) {
             val billItemView: RelativeLayout =
                 inflater.inflate(R.layout.bill_item, null) as RelativeLayout
+
             billItemView.findViewById<TextView>(R.id.bill_item_persons).text = billItem.persons.joinToString(separator = " / ") { "${it.name}" }
             billItemView.findViewById<TextView>(R.id.bill_item_description).text = billItem.description + " × " + billItem.quantity
             billItemView.findViewById<TextView>(R.id.bill_item_amount).text = billItem.amount.toString()
+
+            billItemView.setOnClickListener { showDialog() }
+
             billItemsView.addView(billItemView)
         }
 
         val totalAmountView: TextView = root.findViewById(R.id.bill_total_amount)
 
         totalAmountView.text = billItems.sumByDouble { it.amount }.toString()
+
+        val fab: FloatingActionButton = root.findViewById(R.id.floating_action_button)
+
+        fab.setOnClickListener { showDialog() }
 
 //        splitViewModel.text.observe(viewLifecycleOwner, Observer {
 //            textView.text = it
@@ -93,5 +103,14 @@ class SplitFragment : Fragment() {
             param(FirebaseAnalytics.Param.SCREEN_NAME, "Split Screen")
             param(FirebaseAnalytics.Param.SCREEN_CLASS, "SplitFragment")
         }
+    }
+
+    fun showDialog() {
+        val fragmentManager = activity?.let {
+            val newFragment = BillItemModal()
+
+            newFragment.show(it.supportFragmentManager, "billItemDialog")
+        }
+
     }
 }
