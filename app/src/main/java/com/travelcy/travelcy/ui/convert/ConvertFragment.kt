@@ -2,6 +2,8 @@ package com.travelcy.travelcy.ui.convert
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.databinding.FragmentConvertBindingImpl
+import kotlin.math.absoluteValue
 
 
 class ConvertFragment : Fragment() {
@@ -46,47 +49,68 @@ class ConvertFragment : Fragment() {
             container,
             false
         )
+        convertViewModel.localCurrency.observe(viewLifecycleOwner, Observer {})
+        convertViewModel.foreignCurrency.observe(viewLifecycleOwner, Observer {})
+        convertViewModel.fromAmount.observe(viewLifecycleOwner, Observer {})
+        convertViewModel.toAmount.observe(viewLifecycleOwner, Observer {
+            root.to_amount.setText(it.absoluteValue.toString())
+        })
+
+        root.from_amount.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                // TODO: Fix horrible cast
+                convertViewModel.updateFromAmount(s.toString().toDouble())
+                convertViewModel.updateToAmount()
+            }
+        })
 
         convertViewModel.currencies.observe(viewLifecycleOwner, Observer {
             // Update UI
-            var fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
+            val fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
             root.from_spinner.adapter = fromAA
 
-            var toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
+            val toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
             root.to_spinner.adapter = toAA
         })
 
-        root.switch_button.setOnClickListener {
-            switch_button.text = convertViewModel.listFromCurrencies()[1]
-        }
-        binding.root.setOnClickListener{switch()}
-
         root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                convertViewModel.currencies.value
+                convertViewModel.setLocalCurrency(position)
+                //TODO: Make nicer
+                convertViewModel.setForeignCurrency(convertViewModel.toIndex)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {
-                convertViewModel.foreignCurrency.value
+                convertViewModel.setLocalCurrency(0)
             }
         }
 
         root.to_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                //convertViewModel.setSelectedToCurr(position)
+                convertViewModel.setForeignCurrency(position)
         }
             override fun onNothingSelected(parent: AdapterView<*>) {
-                //convertViewModel.setSelectedToCurr(0)
+                convertViewModel.setForeignCurrency(0)
             }
         }
+
+        root.switch_button.setOnClickListener {
+            switch_button.text = convertViewModel.listFromCurrencies()[1]
+        }
+
+        binding.root.setOnClickListener{switch()}
+
         return root
     }
 
     private fun switch(){
         convertViewModel.switch()
-    }
-
-    private fun populateToSpinner() {
-        //TODO: find out how to repopulate
     }
 
     override fun onResume() {
