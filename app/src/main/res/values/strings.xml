@@ -3,4 +3,5 @@
     <string name="title_convert">CONVERT</string>
     <string name="title_split">SPLIT</string>
     <string name="title_settings">SETTINGS</string>
+    <string name="bill_total_amount">Total</string>
 </resources>

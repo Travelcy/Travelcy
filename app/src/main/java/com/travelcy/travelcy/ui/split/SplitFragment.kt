@@ -75,6 +75,10 @@ class SplitFragment : Fragment() {
             billItemsView.addView(billItemView)
         }
 
+        val totalAmountView: TextView = root.findViewById(R.id.bill_total_amount)
+
+        totalAmountView.text = billItems.sumByDouble { it.amount }.toString()
+
 //        splitViewModel.text.observe(viewLifecycleOwner, Observer {
 //            textView.text = it
 //        })
