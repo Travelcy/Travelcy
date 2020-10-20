@@ -1,46 +1,42 @@
 package com.travelcy.travelcy.ui.convert
 
 import android.util.Log
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.Transformations
-import com.travelcy.travelcy.model.Currency
+import androidx.lifecycle.ViewModel
 import com.travelcy.travelcy.services.currency.CurrencyRepository
-import com.travelcy.travelcy.services.currency.CurrencyWebService
+import java.math.RoundingMode
+import java.text.DecimalFormat
+
 
 class ConvertViewModel(private val currencyRepository: CurrencyRepository) : ViewModel() {
     var toIndex = 0
 
     val localCurrency = currencyRepository.getLocalCurrency()
     val foreignCurrency = currencyRepository.getForeignCurrency()
-    val currencies = currencyRepository.getCurrencies()
+    private val currencies = currencyRepository.getCurrencies()
 
-    val toAmount:MutableLiveData<Double> by lazy {
-        MutableLiveData<Double>()
+    val currencyIds = Transformations.map(currencies) {
+        it.map { currency ->
+            currency.id
+        }
     }
-    val fromAmount:MutableLiveData<Double> by lazy {
-        MutableLiveData<Double>()
+
+    val fromAmount = MutableLiveData<Double>(1.0)
+
+    val toAmount: MediatorLiveData<Double> = MediatorLiveData<Double>().apply {
+        addSource(foreignCurrency) {
+            value = it.exchangeRate * (fromAmount.value ?: 0.0)
+        }
+
+        addSource(fromAmount) {
+            value = it * (foreignCurrency.value?.exchangeRate ?: 0.0)
+        }
     }
 
     fun switch(){
         // TODO: Switch currencies
-    }
-
-    fun listFromCurrencies(): MutableList<String> {
-        val currencyNames = mutableListOf<String>()
-        for (curr in currencies.value!!){
-            currencyNames.add(curr.name)
-        }
-        return currencyNames
-    }
-
-    fun listToCurrencies(): MutableList<String> {
-        val currencyNames = mutableListOf<String>()
-        for (curr in currencies.value!!){
-            currencyNames.add(curr.name)
-        }
-        return currencyNames
     }
 
     fun setLocalCurrency(position:Int) {
@@ -54,13 +50,23 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository) : Vie
         Log.d("FOREIGNCURRENCY", foreignCurrency.value.toString())
     }
 
-    fun updateToAmount() {
-        val fc = foreignCurrency.value!!.exchangeRate
-        val fa = fromAmount.value!!
-        toAmount.value = fc * fa
+    fun formatAmount(amount: Double): String {
+        val decimalFormat = DecimalFormat("#.##")
+        decimalFormat.roundingMode = RoundingMode.CEILING
+        return decimalFormat.format(amount)
     }
 
-    fun updateFromAmount(amount:Double) {
-        fromAmount.value = amount
+    fun updateFromAmount(amount: String) {
+        if (formatAmount(fromAmount.value ?: 0.0) != amount) {
+            fromAmount.value = amount.toDouble()
+        }
+    }
+
+    fun positionOfLocalCurrency(): Int {
+        return currencyIds.value?.indexOf(localCurrency.value?.id) ?: -1
+    }
+
+    fun positionOfForeignCurrency(): Int {
+        return currencyIds.value?.indexOf(foreignCurrency.value?.id) ?: -1
     }
 }

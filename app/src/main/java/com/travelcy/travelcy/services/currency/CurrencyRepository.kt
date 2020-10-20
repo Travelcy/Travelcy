@@ -47,6 +47,9 @@ class CurrencyRepository (
     }
 
     fun changeLocalCurrency(currency: Currency) {
+        if (currency.id == settings.value?.localCurrency?.id) {
+            return
+        }
         // If the foreign currency is the same as the local currency we turn them around
         var foreignCurrencyId = settings.value?.foreignCurrency?.id
 
@@ -60,6 +63,9 @@ class CurrencyRepository (
     }
 
     fun changeForeignCurrency(currency: Currency) {
+        if (currency.id == settings.value?.foreignCurrency?.id) {
+            return
+        }
         // If the foreign currency is the same as the local currency we turn them around
         var localCurrencyId = settings.value?.localCurrency?.id
 

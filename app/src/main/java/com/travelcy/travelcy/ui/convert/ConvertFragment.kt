@@ -16,14 +16,11 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.R
-import kotlinx.android.synthetic.main.fragment_convert.*
 import kotlinx.android.synthetic.main.fragment_convert.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.databinding.FragmentConvertBindingImpl
-import kotlin.math.absoluteValue
-
 
 class ConvertFragment : Fragment() {
 
@@ -31,6 +28,9 @@ class ConvertFragment : Fragment() {
     private lateinit var convertViewModel: ConvertViewModel
 
     private lateinit var binding: FragmentConvertBindingImpl
+
+    private lateinit var foreignCurrenciesAdapter: ArrayAdapter<String>
+    private lateinit var localCurrenciesAdapter: ArrayAdapter<String>
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -49,15 +49,21 @@ class ConvertFragment : Fragment() {
             container,
             false
         )
-        convertViewModel.localCurrency.observe(viewLifecycleOwner, Observer {})
-        convertViewModel.foreignCurrency.observe(viewLifecycleOwner, Observer {})
-        convertViewModel.fromAmount.observe(viewLifecycleOwner, Observer {})
-        convertViewModel.toAmount.observe(viewLifecycleOwner, Observer {
-            root.to_amount.setText(it.absoluteValue.toString())
-        })
+
+        foreignCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
+        root.from_spinner.adapter = foreignCurrenciesAdapter
+
+        localCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
+        root.to_spinner.adapter = foreignCurrenciesAdapter
+
+        root.from_amount.setText(convertViewModel.formatAmount(convertViewModel.fromAmount.value ?: 1.0))
 
         root.from_amount.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
+            override fun afterTextChanged(s: Editable) {
+                if (s.isNotEmpty()) {
+                    convertViewModel.updateFromAmount(s.toString())
+                }
+            }
 
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
@@ -65,29 +71,55 @@ class ConvertFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
-                // TODO: Fix horrible cast
-                convertViewModel.updateFromAmount(s.toString().toDouble())
-                convertViewModel.updateToAmount()
+
             }
         })
 
-        convertViewModel.currencies.observe(viewLifecycleOwner, Observer {
-            // Update UI
-            val fromAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listFromCurrencies())
-            root.from_spinner.adapter = fromAA
+        convertViewModel.toAmount.observe(viewLifecycleOwner, Observer {
+            root.to_amount.setText(convertViewModel.formatAmount(it))
+        })
 
-            val toAA  = ArrayAdapter<String>(activity as Context, android.R.layout.simple_spinner_item, convertViewModel.listToCurrencies())
-            root.to_spinner.adapter = toAA
+        convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
+            localCurrenciesAdapter.clear()
+            localCurrenciesAdapter.addAll(it)
+
+            val localCurrencyIndex = convertViewModel.positionOfLocalCurrency()
+
+            if (localCurrencyIndex >= 0) {
+                root.from_spinner.setSelection(localCurrencyIndex)
+            }
+
+            foreignCurrenciesAdapter.clear()
+            foreignCurrenciesAdapter.addAll(it)
+
+            val foreignCurrencyindex = convertViewModel.positionOfForeignCurrency()
+            if (foreignCurrencyindex >= 0) {
+                root.to_spinner.setSelection(foreignCurrencyindex)
+            }
+        })
+
+        convertViewModel.localCurrency.observe(viewLifecycleOwner, Observer {
+            val index = convertViewModel.positionOfLocalCurrency()
+            if (index >= 0) {
+                root.from_spinner.setSelection(index)
+            }
+        })
+
+        convertViewModel.foreignCurrency.observe(viewLifecycleOwner, Observer {
+            val index = convertViewModel.positionOfForeignCurrency()
+            if (index >= 0) {
+                root.to_spinner.setSelection(index)
+            }
         })
 
         root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                convertViewModel.setLocalCurrency(position)
-                //TODO: Make nicer
-                convertViewModel.setForeignCurrency(convertViewModel.toIndex)
+                if (position != convertViewModel.positionOfLocalCurrency()) {
+                    convertViewModel.setLocalCurrency(position)
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {
-                convertViewModel.setLocalCurrency(0)
+                // Do nothing
             }
         }
 
@@ -96,12 +128,12 @@ class ConvertFragment : Fragment() {
                 convertViewModel.setForeignCurrency(position)
         }
             override fun onNothingSelected(parent: AdapterView<*>) {
-                convertViewModel.setForeignCurrency(0)
+                // Do nothing
             }
         }
 
         root.switch_button.setOnClickListener {
-            switch_button.text = convertViewModel.listFromCurrencies()[1]
+
         }
 
         binding.root.setOnClickListener{switch()}
