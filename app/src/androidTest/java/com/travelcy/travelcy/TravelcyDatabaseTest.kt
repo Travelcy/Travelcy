@@ -10,7 +10,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.TravelcyDatabase
+import com.travelcy.travelcy.database.dao.BillDao
 import com.travelcy.travelcy.database.dao.SettingsDao
+import com.travelcy.travelcy.model.Bill
+import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.Settings
 import org.junit.*
 import org.junit.rules.TestRule
@@ -34,6 +37,7 @@ class TravelcyDatabaseTest {
 
     private lateinit var currencyDao: CurrencyDao
     private lateinit var settingsDao: SettingsDao
+    private lateinit var billDao: BillDao
     private lateinit var travelcyDatabase: TravelcyDatabase
     private lateinit var currencies: Array<Currency>
 
@@ -49,6 +53,7 @@ class TravelcyDatabaseTest {
 
         currencyDao = travelcyDatabase.currencyDao()
         settingsDao = travelcyDatabase.settingsDao()
+        billDao = travelcyDatabase.billDao()
 
         val iskCurrency = JavaCurrency.getInstance("ISK")
         val usdCurrency = JavaCurrency.getInstance("USD")
@@ -151,6 +156,34 @@ class TravelcyDatabaseTest {
 
         retrievedCurrencies?.forEachIndexed { index, element ->
             Assert.assertEquals(element, currencies.get(index))
+        }
+    }
+
+    @Test
+    fun testBillSaveAndLoad() {
+        billDao.updateBill(Bill())
+
+        val retrievedBill = billDao.getBill().blockingObserve()
+
+        Assert.assertNotNull(retrievedBill)
+    }
+
+    @Test
+    fun testBillWithItemsSaveAndLoad() {
+        val bill = Bill()
+        billDao.updateBill(bill)
+        billDao.addBillItem(BillItem(bill.id, "Test description", 1.0))
+        billDao.addBillItem(BillItem(bill.id, "Test description", 2.0))
+
+        val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
+
+        Assert.assertNotNull(retrievedBillWithItems)
+
+        Assert.assertEquals(2, retrievedBillWithItems?.items?.size)
+
+        retrievedBillWithItems?.items?.forEachIndexed() {index, billItem ->
+            Assert.assertEquals("Test description", billItem.description)
+            Assert.assertEquals(index.toDouble() + 1, billItem.amount, 0.0)
         }
     }
 
