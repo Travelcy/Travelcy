@@ -3,6 +3,7 @@
     <color name="colorPrimary">#4AF4FF</color>
     <color name="colorPrimaryDark">#292929</color>
     <color name="colorBackground">#292929</color>
+    <color name="colorElevation">#2F2F2F</color>
     <color name="colorMainFont">#D9FFFFFF</color>
     <color name="colorSecondaryFont">#99FFFFFF</color>
     <color name="colorTabBarBackground">#000000</color>
