@@ -34,11 +34,11 @@ class CurrencyRepository (
 
 
     val localCurrency = Transformations.switchMap(localCurrencyCode) {
-        currencyDao.getCurrency(it)
+        if (it != null) { currencyDao.getCurrency(it) } else { null }
     }
 
     val foreignCurrency = Transformations.switchMap(foreignCurrencyCode) {
-        currencyDao.getCurrency(it)
+        if (it != null) { currencyDao.getCurrency(it) } else { null }
     }
 
     init {
