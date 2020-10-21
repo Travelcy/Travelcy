@@ -9,6 +9,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name=".services.location"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -18,9 +23,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
-            android:value="3ad67298f1603d719c0e64da9ac3989e"/>
+            android:value="3ad67298f1603d719c0e64da9ac3989e" />
     </application>
 
 </manifest>
