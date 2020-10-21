@@ -43,7 +43,9 @@ class CurrencyRepository (
 
     init {
         localCurrencyCode.observeForever {
-            updateCurrencies(it)
+            if (it != null) {
+                updateCurrencies(it)
+            }
         }
 
         executor.execute {
