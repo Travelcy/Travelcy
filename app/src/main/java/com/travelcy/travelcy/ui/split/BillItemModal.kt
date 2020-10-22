@@ -28,59 +28,61 @@ class BillItemModal(private val billItemId: Int, val splitViewModel: SplitViewMo
             val billItemQuantity: TextInputEditText = root.bill_item_quantity
 
             billItemWithPersons.observe(this, Observer {
-                val billItem = it.billItem
+                if (it != null) {
+                    val billItem = it.billItem
 
-                if (billItemDescription.text.toString() !== billItem.description) {
-                    billItemDescription.setText(billItem.description)
-                }
-
-                billItemDescription.setOnEditorActionListener { v, actionId, event ->
-                    if(actionId == EditorInfo.IME_ACTION_DONE){
-                        billItem.description = billItemDescription.text.toString()
-                        splitViewModel.updateBillItem(billItem)
-                        val imm: InputMethodManager = v.context
-                            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(v.windowToken, 0)
-                        billItemDescription.clearFocus()
-                        true
-                    } else {
-                        false
+                    if (billItemDescription.text.toString() !== billItem.description) {
+                        billItemDescription.setText(billItem.description)
                     }
-                }
 
-                if (billItemAmount.text.toString() !== billItem.amount.toString()) {
-                    billItemAmount.setText(billItem.amount.toString())
-                }
-
-                billItemAmount.setOnEditorActionListener { v, actionId, event ->
-                    if(actionId == EditorInfo.IME_ACTION_DONE){
-                        billItem.amount = billItemAmount.text.toString().toDouble()
-                        splitViewModel.updateBillItem(billItem)
-                        val imm: InputMethodManager = v.context
-                            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(v.windowToken, 0)
-                        billItemDescription.clearFocus()
-                        true
-                    } else {
-                        false
+                    billItemDescription.setOnEditorActionListener { v, actionId, event ->
+                        if(actionId == EditorInfo.IME_ACTION_DONE){
+                            billItem.description = billItemDescription.text.toString()
+                            splitViewModel.updateBillItem(billItem)
+                            val imm: InputMethodManager = v.context
+                                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.hideSoftInputFromWindow(v.windowToken, 0)
+                            billItemDescription.clearFocus()
+                            true
+                        } else {
+                            false
+                        }
                     }
-                }
 
-                if (billItemQuantity.text.toString() !== billItem.quantity.toString()) {
-                    billItemQuantity.setText(billItem.quantity.toString())
-                }
+                    if (billItemAmount.text.toString() !== billItem.amount.toString()) {
+                        billItemAmount.setText(billItem.amount.toString())
+                    }
 
-                billItemQuantity.setOnEditorActionListener { v, actionId, event ->
-                    if(actionId == EditorInfo.IME_ACTION_DONE){
-                        billItem.quantity = billItemQuantity.text.toString().toInt()
-                        splitViewModel.updateBillItem(billItem)
-                        val imm: InputMethodManager = v.context
-                            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(v.windowToken, 0)
-                        billItemDescription.clearFocus()
-                        true
-                    } else {
-                        false
+                    billItemAmount.setOnEditorActionListener { v, actionId, event ->
+                        if(actionId == EditorInfo.IME_ACTION_DONE){
+                            billItem.amount = billItemAmount.text.toString().toDouble()
+                            splitViewModel.updateBillItem(billItem)
+                            val imm: InputMethodManager = v.context
+                                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.hideSoftInputFromWindow(v.windowToken, 0)
+                            billItemDescription.clearFocus()
+                            true
+                        } else {
+                            false
+                        }
+                    }
+
+                    if (billItemQuantity.text.toString() !== billItem.quantity.toString()) {
+                        billItemQuantity.setText(billItem.quantity.toString())
+                    }
+
+                    billItemQuantity.setOnEditorActionListener { v, actionId, event ->
+                        if(actionId == EditorInfo.IME_ACTION_DONE){
+                            billItem.quantity = billItemQuantity.text.toString().toInt()
+                            splitViewModel.updateBillItem(billItem)
+                            val imm: InputMethodManager = v.context
+                                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.hideSoftInputFromWindow(v.windowToken, 0)
+                            billItemDescription.clearFocus()
+                            true
+                        } else {
+                            false
+                        }
                     }
                 }
             })
