@@ -4,17 +4,16 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "bill_items", foreignKeys = [ForeignKey(entity = Bill::class,
+@Entity(tableName = "persons", foreignKeys = [
+    ForeignKey(entity = Bill::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("billId"),
-    onDelete = ForeignKey.CASCADE)],
-    indices = []
-)
-class BillItem(
-    val description: String,
-    val amount: Double
+    onDelete = ForeignKey.CASCADE)
+])
+class Person (
+    val name: String
 ) {
     @PrimaryKey(autoGenerate = true)
     var id = 0
-    var billId = 1
+    var billId: Int = 1
 }

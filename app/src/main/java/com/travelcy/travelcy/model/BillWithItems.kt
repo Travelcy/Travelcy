@@ -5,6 +5,10 @@ import androidx.room.Relation
 
 data class BillWithItems (
     @Embedded val bill: Bill,
+
+    @Relation(parentColumn = "id", entityColumn = "billId", entity = BillItem::class)
+    val items: List<BillItemWithPersons>,
+
     @Relation(parentColumn = "id", entityColumn = "billId")
-    val items: List<BillItem>
+    val persons: List<Person>
 )
