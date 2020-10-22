@@ -1,12 +1,15 @@
 package com.travelcy.travelcy.services.location
 
+import androidx.lifecycle.LiveData
 import com.travelcy.travelcy.database.dao.LocationDao
 import com.travelcy.travelcy.model.Location
 import java.util.Locale
 import java.util.Currency
-class LocationRepository (private val locationDao: LocationDao){
+import java.util.concurrent.Executor
 
-    private val currentLocation:Location? = locationDao.getLocation()
+class LocationRepository (private val locationDao: LocationDao, private val executor: Executor){
+
+    val currentLocation: LiveData<Location> = locationDao.getLocation()
 
     private fun getGPSLocation():Location {
         // get country
@@ -20,13 +23,23 @@ class LocationRepository (private val locationDao: LocationDao){
         return Location(1, country, currencyCode)
     }
 
-    fun getCurrentLocation():Location {
-        val gpsLocation = getGPSLocation()
-        // If the currentLocation hasn't been set, or the location is different - update it
-        if(currentLocation == null || gpsLocation.country !== currentLocation.country) {
-            locationDao.updateLocation(gpsLocation)
+    private fun updateLocation(location:Location) {
+        executor.execute {
+            locationDao.updateLocation(location)
         }
+    }
 
-        return currentLocation as Location
+    init {
+        currentLocation.observeForever {
+            if (it != null && it.country != currentLocation.value?.country) {
+                updateLocation(it)
+            }
+        }
+        executor.execute {
+            if (!locationDao.hasLocation()) {
+                // Setup initial location
+                updateLocation(getGPSLocation())
+            }
+        }
     }
 }

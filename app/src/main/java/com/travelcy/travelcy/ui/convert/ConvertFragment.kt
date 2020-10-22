@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +41,7 @@ class ConvertFragment : Fragment() {
         firebaseAnalytics = Firebase.analytics
 
         val mainApplication: MainApplication = requireActivity().application as MainApplication
-        convertViewModel = ViewModelProvider(this, ConvertViewModelFactory(mainApplication.getCurrencyRepository())).get(ConvertViewModel::class.java)
+        convertViewModel = ViewModelProvider(this, ConvertViewModelFactory(mainApplication.getCurrencyRepository(), mainApplication.getLocationRepository())).get(ConvertViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_convert, container, false)
 
         binding = DataBindingUtil.inflate(
@@ -105,9 +106,10 @@ class ConvertFragment : Fragment() {
             }
         })
 
-        convertViewModel.foreignCurrency.observe(viewLifecycleOwner, Observer {
-            val index = convertViewModel.positionOfForeignCurrency()
-            if (index >= 0) {
+        convertViewModel.currentLocation.observe(viewLifecycleOwner, Observer {
+            val index = convertViewModel.positionOfLocationCurrency()
+            if(index >= 0) {
+                convertViewModel.setForeignCurrency(index)
                 root.to_spinner.setSelection(index)
             }
         })

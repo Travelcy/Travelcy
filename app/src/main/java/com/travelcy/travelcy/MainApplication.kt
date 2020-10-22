@@ -5,6 +5,7 @@ import com.bugsnag.android.Bugsnag
 import com.travelcy.travelcy.database.TravelcyDatabase
 import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.services.currency.CurrencyWebService
+import com.travelcy.travelcy.services.location.LocationRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.ExecutorService
@@ -17,6 +18,7 @@ class MainApplication : Application() {
 
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
 
+    private var locationRepository:LocationRepository? = null
     override fun onCreate() {
         super.onCreate()
         Bugsnag.start(this)
@@ -41,6 +43,15 @@ class MainApplication : Application() {
         }
 
         return currencyRepository as CurrencyRepository
+    }
+
+    fun getLocationRepository(): LocationRepository {
+        if (locationRepository == null) {
+            val database = TravelcyDatabase.getInstance(this)
+            locationRepository = LocationRepository(database.locationDao(), executorService)
+        }
+
+        return locationRepository as LocationRepository
     }
 
     companion object {
