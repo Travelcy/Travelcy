@@ -160,7 +160,7 @@ class TravelcyDatabaseTest {
     fun testBillSaveAndLoad() {
         billDao.updateBill(Bill())
 
-        val retrievedBill = billDao.getBill().blockingObserve()
+        val retrievedBill = billDao.getBill()
 
         Assert.assertNotNull(retrievedBill)
     }
@@ -169,8 +169,8 @@ class TravelcyDatabaseTest {
     fun testBillWithItemsSaveAndLoad() {
         val bill = Bill()
         billDao.updateBill(bill)
-        billDao.addBillItemToBill(BillItem("Test description", 1.0), bill)
-        billDao.addBillItemToBill(BillItem("Test description", 2.0), bill)
+        billDao.addBillItemToBill(BillItem("Test description", 1.0, 1), bill)
+        billDao.addBillItemToBill(BillItem("Test description", 2.0, 1), bill)
 
         val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
 
@@ -188,7 +188,7 @@ class TravelcyDatabaseTest {
     fun testBillItemWithPerson() {
         val bill = Bill()
         billDao.updateBill(bill)
-        val billItem = BillItem("Test description", 1.0)
+        val billItem = BillItem("Test description", 1.0, 1)
         billDao.addBillItemToBill(billItem, bill)
         val person = Person("Test name")
         billDao.addPersonToBillItem(billItem, person)

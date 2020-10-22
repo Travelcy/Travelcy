@@ -11,9 +11,11 @@
         android:hint="@string/bill_item_description"
         android:layout_marginBottom="18dp">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bill_item_description"
             android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -24,9 +26,11 @@
         android:hint="@string/bill_item_amount"
         android:layout_marginBottom="18dp">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bill_item_amount"
             android:inputType="numberDecimal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -36,6 +40,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/bill_item_quantity">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bill_item_quantity"
             android:inputType="number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

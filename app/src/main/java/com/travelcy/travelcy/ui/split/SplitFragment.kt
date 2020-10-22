@@ -1,6 +1,7 @@
 package com.travelcy.travelcy.ui.split
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,31 +11,24 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
+import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.R
-
-class Bill {}
-
-class Person(var name: String) {
-}
-
-class BillItem(private var bill: Bill) {
-var description: String? = null
-var quantity: Number = 1
-var amount: Double = 0.0
-var persons: MutableList<Person> = mutableListOf()
-}
+import com.travelcy.travelcy.model.BillItem
+import com.travelcy.travelcy.ui.convert.ConvertViewModel
+import com.travelcy.travelcy.ui.convert.ConvertViewModelFactory
+import java.util.concurrent.Executor
 
 class SplitFragment : Fragment() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var splitViewModel: SplitViewModel
-    private var bill: Bill = Bill()
-    private lateinit var billItems: List<BillItem>
+    private lateinit var executor: Executor
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -43,55 +37,41 @@ class SplitFragment : Fragment() {
     ): View? {
         firebaseAnalytics = Firebase.analytics
 
-        val billItem1 = BillItem(bill)
-        billItem1.description = "Cheese Burger"
-        billItem1.persons.add(Person("Einar Tryggvi"))
-        billItem1.amount = 25.0
-
-        val billItem2 = BillItem(bill)
-        billItem2.description = "Buffalo Hot Wings"
-        billItem2.persons.add(Person("Karl Asgeir"))
-        billItem2.quantity = 2
-        billItem2.amount = 18.0
-
-        val billItem3 = BillItem(bill)
-        billItem3.description = "Cheese fries"
-        billItem3.persons.add(Person("Einar Tryggvi"))
-        billItem3.persons.add(Person("Karl Asgeir"))
-        billItem3.amount = 8.0
-
-        billItems = listOf(billItem1, billItem2, billItem3)
-
-        splitViewModel =
-                ViewModelProviders.of(this).get(SplitViewModel::class.java)
+        val mainApplication: MainApplication = requireActivity().application as MainApplication
+        executor = mainApplication.getExecutor()
+        splitViewModel = ViewModelProvider(this, SplitViewModelFactory(mainApplication.getBillRepository())).get(
+            SplitViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_split, container, false)
         val billItemsView: LinearLayout = root.findViewById(R.id.bill_items)
 
-        for (billItem in billItems) {
-            val billItemView: RelativeLayout =
-                inflater.inflate(R.layout.bill_item, null) as RelativeLayout
+        splitViewModel.billItemsWithPersons.observe(viewLifecycleOwner, Observer { billItemsWithPerson ->
+            billItemsView.removeAllViews()
 
-            billItemView.findViewById<TextView>(R.id.bill_item_persons).text = billItem.persons.joinToString(separator = " / ") { "${it.name}" }
-            billItemView.findViewById<TextView>(R.id.bill_item_description).text = billItem.description + " × " + billItem.quantity
-            billItemView.findViewById<TextView>(R.id.bill_item_amount).text = billItem.amount.toString()
+            billItemsWithPerson.forEach {
+                val billItem = it.billItem
+                val billItemView: RelativeLayout =
+                    inflater.inflate(R.layout.bill_item, null) as RelativeLayout
+                billItemView.findViewById<TextView>(R.id.bill_item_persons).text = it.persons.joinToString(separator = " / ") { "${it.name}" }
+                billItemView.findViewById<TextView>(R.id.bill_item_description).text =
+                    "${billItem.description} × ${billItem.quantity}"
+                billItemView.findViewById<TextView>(R.id.bill_item_amount).text = billItem.amount.toString()
 
-            billItemView.setOnClickListener { showDialog() }
+                billItemView.setOnClickListener { showEditBillItemDialog(billItem.id) }
 
-            billItemsView.addView(billItemView)
-        }
+                billItemsView.addView(billItemView)
+            }
+        })
 
         val totalAmountView: TextView = root.findViewById(R.id.bill_total_amount)
 
-        totalAmountView.text = billItems.sumByDouble { it.amount }.toString()
+        splitViewModel.totalAmount.observe(viewLifecycleOwner, Observer {
+            totalAmountView.text = it
+        })
 
         val fab: FloatingActionButton = root.findViewById(R.id.floating_action_button)
 
-        fab.setOnClickListener { showDialog() }
-
-//        splitViewModel.text.observe(viewLifecycleOwner, Observer {
-//            textView.text = it
-//        })
+        fab.setOnClickListener { showAddBillItemDialog() }
 
         return root
     }
@@ -105,12 +85,30 @@ class SplitFragment : Fragment() {
         }
     }
 
-    fun showDialog() {
+    fun showAddBillItemDialog() {
+        Log.d(TAG, "showAddBillItemDialog")
+        val billItem = BillItem("", 0.0, 1)
+
+        executor.execute {
+            val id = splitViewModel.addBillItem(billItem)
+            Log.d(TAG, "addedBillItem with id $id")
+            showEditBillItemDialog(id)
+        }
+    }
+
+    fun showEditBillItemDialog(billItemId: Int) {
+        Log.d(TAG, "showEditBillItemDialog(billItemId: $id)")
+
         val fragmentManager = activity?.let {
-            val newFragment = BillItemModal()
+
+            val newFragment = BillItemModal(billItemId, splitViewModel)
 
             newFragment.show(it.supportFragmentManager, "billItemDialog")
         }
 
+    }
+
+    companion object {
+        const val TAG = "SplitFragment"
     }
 }

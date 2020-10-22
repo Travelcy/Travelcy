@@ -1,11 +1,8 @@
 package com.travelcy.travelcy.database.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
+import androidx.room.*
 import androidx.room.OnConflictStrategy.REPLACE
-import androidx.room.Query
-import androidx.room.Transaction
 import com.travelcy.travelcy.model.*
 
 
@@ -14,15 +11,21 @@ interface BillDao {
     @Insert(onConflict = REPLACE)
     fun updateBill(bill: Bill)
 
+    @Query("SELECT COUNT(*) FROM bills")
+    fun hasBill(): Boolean
+
     @Query("SELECT * FROM bills where id = 1")
-    fun getBill(): LiveData<Bill>
+    fun getBill(): Bill
 
     @Insert(onConflict = REPLACE)
-    fun addBillItem(billItem: BillItem)
+    fun addBillItem(billItem: BillItem): Long
 
-    fun addBillItemToBill(billItem: BillItem, bill: Bill) {
+    @Update
+    fun updateBillItem(billItem: BillItem)
+
+    fun addBillItemToBill(billItem: BillItem, bill: Bill): Long {
         billItem.billId = bill.id
-        addBillItem(billItem)
+        return addBillItem(billItem)
     }
 
     @Query("INSERT INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
@@ -43,4 +46,10 @@ interface BillDao {
 
     @Query("select * from bill_items")
     fun getBillItemsWithPerson() : List<BillItemWithPersons>
+
+    @Query("select * from bill_items where id = :billItemId")
+    fun getBillItemWithPersons(billItemId: Int): LiveData<BillItemWithPersons>
+
+    @Delete
+    fun deleteBillItem(billItem: BillItem)
 }
