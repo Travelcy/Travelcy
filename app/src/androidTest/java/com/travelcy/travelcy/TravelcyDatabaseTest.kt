@@ -7,11 +7,11 @@ import androidx.lifecycle.Observer
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.TravelcyDatabase
+import com.travelcy.travelcy.database.dao.BillDao
 import com.travelcy.travelcy.database.dao.SettingsDao
-import com.travelcy.travelcy.model.Settings
+import com.travelcy.travelcy.model.*
 import org.junit.*
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
@@ -34,6 +34,7 @@ class TravelcyDatabaseTest {
 
     private lateinit var currencyDao: CurrencyDao
     private lateinit var settingsDao: SettingsDao
+    private lateinit var billDao: BillDao
     private lateinit var travelcyDatabase: TravelcyDatabase
     private lateinit var currencies: Array<Currency>
 
@@ -49,6 +50,7 @@ class TravelcyDatabaseTest {
 
         currencyDao = travelcyDatabase.currencyDao()
         settingsDao = travelcyDatabase.settingsDao()
+        billDao = travelcyDatabase.billDao()
 
         val iskCurrency = JavaCurrency.getInstance("ISK")
         val usdCurrency = JavaCurrency.getInstance("USD")
@@ -151,6 +153,60 @@ class TravelcyDatabaseTest {
 
         retrievedCurrencies?.forEachIndexed { index, element ->
             Assert.assertEquals(element, currencies.get(index))
+        }
+    }
+
+    @Test
+    fun testBillSaveAndLoad() {
+        billDao.updateBill(Bill())
+
+        val retrievedBill = billDao.getBill()
+
+        Assert.assertNotNull(retrievedBill)
+    }
+
+    @Test
+    fun testBillWithItemsSaveAndLoad() {
+        val bill = Bill()
+        billDao.updateBill(bill)
+        billDao.addBillItemToBill(BillItem("Test description", 1.0, 1), bill)
+        billDao.addBillItemToBill(BillItem("Test description", 2.0, 1), bill)
+
+        val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
+
+        Assert.assertNotNull(retrievedBillWithItems)
+
+        Assert.assertEquals(2, retrievedBillWithItems?.items?.size)
+
+        retrievedBillWithItems?.items?.forEachIndexed() {index, billItemWithPersons ->
+            Assert.assertEquals("Test description", billItemWithPersons.billItem.description)
+            Assert.assertEquals(index.toDouble() + 1, billItemWithPersons.billItem.amount, 0.0)
+        }
+    }
+
+    @Test
+    fun testBillItemWithPerson() {
+        val bill = Bill()
+        billDao.updateBill(bill)
+        val billItem = BillItem("Test description", 1.0, 1)
+        billDao.addBillItemToBill(billItem, bill)
+        val person = Person("Test name")
+        billDao.addPersonToBillItem(billItem, person)
+
+        val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
+
+        Assert.assertNotNull(retrievedBillWithItems)
+
+        Assert.assertEquals(1, retrievedBillWithItems?.items?.size)
+
+        retrievedBillWithItems?.persons?.forEach {
+            Assert.assertEquals("Test name", it.name)
+        }
+
+        retrievedBillWithItems?.items?.forEachIndexed {index, billItemWithPersons ->
+            Assert.assertEquals("Test description", billItemWithPersons.billItem.description)
+            Assert.assertEquals(index.toDouble() + 1, billItemWithPersons.billItem.amount, 0.0)
+            billItemWithPersons.persons.forEach { Assert.assertEquals("Test name", it.name) }
         }
     }
 
