@@ -1,5 +1,7 @@
 package com.travelcy.travelcy.utils
 
+import android.text.Editable
+import java.lang.Exception
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -22,5 +24,29 @@ object FormatUtils {
         format.setCurrency(Currency.getInstance(currencyCode))
 
         return format.format(amount)
+    }
+
+    fun editTextToDouble(text: Editable?): Double {
+        return stringToDouble(text?.toString())
+    }
+
+    fun editTextToInt(text: Editable?): Int {
+        return stringToInt(text?.toString())
+    }
+
+    fun stringToDouble(string: String?): Double {
+        return try {
+            string?.toDouble() ?: 0.0
+        } catch (exception: Exception) {
+            0.0
+        }
+    }
+
+    fun stringToInt(string: String?): Int {
+        return try {
+            string?.toInt() ?: 0
+        } catch (exception: Exception) {
+            0
+        }
     }
 }
