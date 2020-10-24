@@ -48,10 +48,6 @@ class CurrencyRepository (
             }
         }
 
-        foreignCurrency.observeForever {
-            Log.d(TAG, "Foreign currency changed ${it?.id ?: "no currency"}")
-        }
-
         executor.execute {
             if (!settingsDao.hasSettings()) {
                 Log.d(TAG, "No settings in database, setting up initial settings")
