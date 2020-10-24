@@ -7,4 +7,5 @@
     <color name="colorMainFont">#D9FFFFFF</color>
     <color name="colorSecondaryFont">#99FFFFFF</color>
     <color name="colorTabBarBackground">#000000</color>
+    <color name="colorSeparator">#1FFFFFFF</color>
 </resources>

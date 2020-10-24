@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <RelativeLayout
+        android:id="@+id/bill_item_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="18dp"
+        >
+        <TextView
+            android:id="@+id/bill_item_persons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorSecondaryFont"
+            android:textSize="12sp"
+            android:textAllCaps="true"
+            android:text="Einar Tryggvi"
+            />
+        <TextView
+            android:id="@+id/bill_item_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorMainFont"
+            android:textSize="18sp"
+            android:text="Cheese Burger x 1"
+            android:paddingVertical="2dp"
+            android:layout_below="@id/bill_item_persons"
+            />
+        <TextView
+            android:id="@+id/bill_item_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorSecondaryFont"
+            android:textSize="14sp"
+            android:text="$18"
+            android:layout_below="@id/bill_item_description"
+            />
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            app:tint="@color/colorSecondaryFont"
+            android:src="@drawable/caret_right" />
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/bill_item_content"
+        android:background="@color/colorSeparator" />
+</RelativeLayout>
