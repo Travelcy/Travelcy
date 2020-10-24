@@ -21,6 +21,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.databinding.FragmentConvertBindingImpl
+import com.travelcy.travelcy.utils.FormatUtils
 
 class ConvertFragment : Fragment() {
 
@@ -56,7 +57,7 @@ class ConvertFragment : Fragment() {
         localCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
         root.to_spinner.adapter = foreignCurrenciesAdapter
 
-        root.from_amount.setText(convertViewModel.formatAmount(convertViewModel.fromAmount.value ?: 1.0))
+        root.from_amount.setText(FormatUtils.formatDecimal(convertViewModel.fromAmount.value ?: 1.0))
 
         root.from_amount.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {

@@ -1,20 +1,36 @@
 package com.travelcy.travelcy.ui.split
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.BillItemWithPersons
+import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.services.bill.BillRepository
+import com.travelcy.travelcy.services.currency.CurrencyRepository
+import com.travelcy.travelcy.utils.FormatUtils
 
-class SplitViewModel(private val billRepository: BillRepository) : ViewModel() {
+class SplitViewModel(private val billRepository: BillRepository, private val currencyRepository: CurrencyRepository) : ViewModel() {
 
     val billItemsWithPersons = billRepository.billItemsWithPersons
 
-    val totalAmount = Transformations.map(billItemsWithPersons) { billItems ->
-        billItems?.sumByDouble { it.billItem.amount * it.billItem.quantity }.toString()
+    private val foreignCurrency: LiveData<Currency> = currencyRepository.foreignCurrency
+    private val localCurrency: LiveData<Currency> = currencyRepository.localCurrency
+
+    val totalAmount: MediatorLiveData<String> = MediatorLiveData<String>().apply {
+        fun recalculateTotal(billItems: List<BillItemWithPersons>?, currency: Currency?) {
+            val localAmount = billItems?.sumByDouble { it.billItem.amount * it.billItem.quantity } ?: 0.0
+
+            value = formatPrice(localAmount, localCurrency.value, currency)
+        }
+
+        addSource(foreignCurrency) {
+           recalculateTotal(billItemsWithPersons.value, it)
+        }
+
+        addSource(billItemsWithPersons) {
+            recalculateTotal(it, foreignCurrency.value)
+        }
     }
+
 
     fun addBillItem(billItem: BillItem): Int {
         return billRepository.addBillItem(billItem)
@@ -32,8 +48,19 @@ class SplitViewModel(private val billRepository: BillRepository) : ViewModel() {
         return billRepository.deleteBillItem(billItem)
     }
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is the Split Fragment"
+    fun formatPrice(amount: Double): String {
+        return formatPrice(amount, localCurrency.value, foreignCurrency.value)
     }
-    val text: LiveData<String> = _text
+
+    private fun formatPrice(amount: Double, local: Currency?, foreign: Currency?): String {
+        var foreignAmount: Double? = null
+        if (foreign != null) {
+            foreignAmount = foreign.exchangeRate * amount
+        }
+
+        val formattedLocalAmount = FormatUtils.formatCurrency(amount, local?.id)
+        val formattedForeignAmount = if (foreignAmount != null) {" / " + FormatUtils.formatCurrency(foreignAmount, foreign?.id)} else {""}
+
+        return "$formattedLocalAmount$formattedForeignAmount"
+    }
 }

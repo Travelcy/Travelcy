@@ -39,7 +39,7 @@ class SplitFragment : Fragment() {
 
         val mainApplication: MainApplication = requireActivity().application as MainApplication
         executor = mainApplication.getExecutor()
-        splitViewModel = ViewModelProvider(this, SplitViewModelFactory(mainApplication.getBillRepository())).get(
+        splitViewModel = ViewModelProvider(this, SplitViewModelFactory(mainApplication.getBillRepository(), mainApplication.getCurrencyRepository())).get(
             SplitViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_split, container, false)
@@ -52,10 +52,10 @@ class SplitFragment : Fragment() {
                 val billItem = it.billItem
                 val billItemView: RelativeLayout =
                     inflater.inflate(R.layout.bill_item, null) as RelativeLayout
-                billItemView.findViewById<TextView>(R.id.bill_item_persons).text = it.persons.joinToString(separator = " / ") { "${it.name}" }
+                billItemView.findViewById<TextView>(R.id.bill_item_persons).text = it.persons.joinToString(separator = " / ") { person -> person.name }
                 billItemView.findViewById<TextView>(R.id.bill_item_description).text =
                     "${billItem.description} × ${billItem.quantity}"
-                billItemView.findViewById<TextView>(R.id.bill_item_amount).text = billItem.amount.toString()
+                billItemView.findViewById<TextView>(R.id.bill_item_amount).text = splitViewModel.formatPrice(billItem.amount)
 
                 billItemView.setOnClickListener { showEditBillItemDialog(billItem.id) }
 
