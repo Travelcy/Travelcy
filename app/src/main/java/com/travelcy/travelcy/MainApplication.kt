@@ -1,6 +1,7 @@
 package com.travelcy.travelcy
 
 import android.app.Application
+import android.content.Context
 import com.bugsnag.android.Bugsnag
 import com.travelcy.travelcy.database.TravelcyDatabase
 import com.travelcy.travelcy.services.bill.BillRepository
@@ -20,6 +21,10 @@ class MainApplication : Application() {
     private var billRepository: BillRepository? = null
 
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
+
+    init {
+        instance = this
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -62,5 +67,10 @@ class MainApplication : Application() {
 
     companion object {
         const val CURRENCY_WEBSERVICE_BASE_URL = "https://api.exchangeratesapi.io/"
+        private var instance: MainApplication? = null
+
+        fun applicationContext() : Context {
+            return instance!!.applicationContext
+        }
     }
 }

@@ -19,6 +19,7 @@ import com.travelcy.travelcy.R
 import kotlinx.android.synthetic.main.fragment_convert.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.databinding.FragmentConvertBindingImpl
 import com.travelcy.travelcy.utils.FormatUtils
@@ -39,9 +40,9 @@ class ConvertFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         firebaseAnalytics = Firebase.analytics
-
-        val mainApplication: MainApplication = requireActivity().application as MainApplication
-        convertViewModel = ViewModelProvider(this, ConvertViewModelFactory(mainApplication.getCurrencyRepository())).get(ConvertViewModel::class.java)
+        val activity: MainActivity = requireActivity() as MainActivity
+        val mainApplication: MainApplication =  activity.application as MainApplication
+        convertViewModel = ViewModelProvider(this, ConvertViewModelFactory(mainApplication.getCurrencyRepository(), activity.locationRepository)).get(ConvertViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_convert, container, false)
 
         binding = DataBindingUtil.inflate(
@@ -135,6 +136,10 @@ class ConvertFragment : Fragment() {
 
         root.switch_button.setOnClickListener {
             convertViewModel.switch()
+        }
+
+        root.geo_location_button.setOnClickListener {
+            convertViewModel.updateCurrencyBasedOnLocation()
         }
 
         binding.root.setOnClickListener{switch()}
