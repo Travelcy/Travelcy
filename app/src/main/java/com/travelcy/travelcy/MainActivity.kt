@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val mLocationRequest = LocationRequest.create()
         mLocationRequest.interval = 60000
         mLocationRequest.fastestInterval = 5000
-        mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, object: LocationCallback() {
             override fun onLocationAvailability(p0: LocationAvailability?) {
