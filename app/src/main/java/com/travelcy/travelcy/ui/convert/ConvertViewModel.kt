@@ -5,7 +5,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.travelcy.travelcy.model.Location
 import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.services.location.LocationRepository
 import java.math.RoundingMode
@@ -14,7 +13,6 @@ import java.text.DecimalFormat
 
 class ConvertViewModel(private val currencyRepository: CurrencyRepository, private val locationRepository: LocationRepository) : ViewModel() {
     var toIndex = 0
-    val currentLocation = locationRepository.currentLocation
     val localCurrency = currencyRepository.localCurrency
     val foreignCurrency = currencyRepository.foreignCurrency
     private val currencies = currencyRepository.currencies
@@ -72,7 +70,7 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
         return currencyIds.value?.indexOf(foreignCurrency.value?.id) ?: -1
     }
 
-    fun positionOfLocationCurrency(): Int {
-        return currencyIds.value?.indexOf(currentLocation.value?.currencyCode) ?: -1
+    fun updateCurrencyBasedOnLocation() {
+        locationRepository.updateForeignCurrencyFromLocation()
     }
 }

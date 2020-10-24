@@ -1,62 +1,70 @@
 package com.travelcy.travelcy.services.location
 
-import android.content.Context
-import android.telephony.TelephonyManager
-import androidx.lifecycle.LiveData
-import com.travelcy.travelcy.MainApplication
-import com.travelcy.travelcy.database.dao.LocationDao
-import com.travelcy.travelcy.model.Location
-import java.util.*
-import java.util.concurrent.Executor
+import android.annotation.SuppressLint
+import android.location.Geocoder
+import android.location.Location
+import android.util.Log
+import android.widget.Toast
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.travelcy.travelcy.MainActivity
+import com.travelcy.travelcy.model.Currency
+import com.travelcy.travelcy.services.currency.CurrencyRepository
+import java.util.Locale
+import java.util.Currency as JavaCurrency
 
-class LocationRepository(private val locationDao: LocationDao, private val executor: Executor){
 
-    val currentLocation: LiveData<Location> = locationDao.getLocation()
+class LocationRepository(private val activity: MainActivity, private val fusedLocationProviderClient: FusedLocationProviderClient, private val currencyRepository: CurrencyRepository){
+    private val currencies = currencyRepository.currencies
 
-    private fun getLocation():Location {
-        // get country
-        val locale = Locale("", getCountryCode()!!)
-        val country = locale.country
+    private fun getCurrencyFromLocation(location: Location): Currency? {
+        val geocoder = Geocoder(activity, Locale.getDefault())
+        val address = geocoder.getFromLocation(location.latitude, location.longitude, 1);
 
-        // get currency code
-        val currencyCode = Currency.getInstance(locale).currencyCode
+        if (address.isEmpty()) {
+            return null;
+        }
 
-        // create and return new location with country and currency code
-        return Location(1, country, currencyCode)
-    }
+        val currencyCode = JavaCurrency.getInstance(Locale("", address[0].countryCode))?.currencyCode
 
-    private fun getCountryCode(context: Context = MainApplication.applicationContext()): String? {
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        val simCountry = tm.simCountryIso
-        if (simCountry != null && simCountry.length == 2) { // SIM country code is available
-            return simCountry
-        } else if (tm.phoneType != TelephonyManager.PHONE_TYPE_CDMA) { // Device is not 3G (would be unreliable)
-            val networkCountry = tm.networkCountryIso
-            if (networkCountry != null && networkCountry.length == 2) { // network country code is available
-                return networkCountry
+        if (currencies.value?.isNotEmpty() == true) {
+            return currencies.value?.find {
+                currency -> currency.id == currencyCode
             }
         }
 
         return null
     }
 
-    private fun updateLocation(location: Location) {
-        executor.execute {
-            locationDao.updateLocation(location)
+    @SuppressLint("MissingPermission")
+    fun updateForeignCurrencyFromLocation() {
+        Log.d(TAG, "updateForeignCurrencyFromLocation")
+        if (!activity.hasLocationPermissions()
+        ) {
+            Log.d(TAG, "Requesting permissions")
+            activity.requestLocationPermissions()
+        }
+        else {
+            Log.d(TAG, "Waiting for location")
+            fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                if (it != null) {
+                    Log.d(TAG, "Got location $it")
+                    val currency = getCurrencyFromLocation(it)
+                    if (currency != null) {
+                        currencyRepository.changeForeignCurrency(currency)
+                    }
+                    else {
+                        Log.d(TAG, "Could not convert location to currency")
+                    }
+                }
+                else {
+                    // TODO show error or request that location is turned on
+                    Log.d(TAG, "Location is not available")
+                }
+            }
         }
     }
 
-    init {
-        currentLocation.observeForever {
-            if (it != null && it.country != currentLocation.value?.country) {
-                updateLocation(it)
-            }
-        }
-        executor.execute {
-            if (!locationDao.hasLocation()) {
-                // Setup initial location
-                updateLocation(getLocation())
-            }
-        }
+    companion object {
+        const val TAG = "LocationRepository"
     }
 }
