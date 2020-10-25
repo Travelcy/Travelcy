@@ -17,6 +17,6 @@ class BillItem(
     var quantity: Int
 ) {
     @PrimaryKey(autoGenerate = true)
-    var id = 0
+    var id: Int? = null
     var billId = 1
 }
