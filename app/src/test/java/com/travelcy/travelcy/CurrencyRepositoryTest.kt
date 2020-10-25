@@ -134,6 +134,8 @@ class CurrencyRepositoryTest {
 
     private lateinit var currencyRepository: CurrencyRepository
 
+    private lateinit var response: MockResponse
+
     @Before
     fun setup() {
         // Gson converts JSON responses to java classes
@@ -163,7 +165,7 @@ class CurrencyRepositoryTest {
             .put("base", "ISK")
             .put("date", "2020-10-09")
 
-        val response = MockResponse()
+        response = MockResponse()
             .setResponseCode(HttpURLConnection.HTTP_OK)
             .addHeader("Content-Type", "application/json")
             .setBody(jsonResponse.toString())
@@ -192,6 +194,8 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
+        mockWebServer.enqueue(response)
+
         currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!.id)
 
         val localCurrency = currencyRepository.localCurrency.blockingObserve()
@@ -208,6 +212,8 @@ class CurrencyRepositoryTest {
 
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
+
+        mockWebServer.enqueue(response)
 
         currencyRepository.changeForeignCurrency(localCurrencyBefore!!.id)
 
