@@ -52,6 +52,8 @@ class TravelcyDatabaseTest {
         settingsDao = travelcyDatabase.settingsDao()
         billDao = travelcyDatabase.billDao()
 
+        billDao.createBill(Bill())
+
         val iskCurrency = JavaCurrency.getInstance("ISK")
         val usdCurrency = JavaCurrency.getInstance("USD")
 
@@ -71,9 +73,6 @@ class TravelcyDatabaseTest {
 
         // Insert currencies to database
         currencies.asList().forEach { currencyDao.insertCurrency(it) }
-
-        // Add bill
-        billDao.updateBill(Bill())
     }
 
     /**
@@ -161,8 +160,6 @@ class TravelcyDatabaseTest {
 
     @Test
     fun testBillSaveAndLoad() {
-        billDao.updateBill(Bill())
-
         val retrievedBill = billDao.getBill().blockingObserve()
 
         Assert.assertNotNull(retrievedBill)

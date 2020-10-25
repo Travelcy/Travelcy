@@ -42,14 +42,6 @@ class CurrencyRepository (
                 updateCurrencies(it)
             }
         }
-
-        executor.execute {
-            if (!settingsDao.hasSettings()) {
-                Log.d(TAG, "No settings in database, setting up initial settings")
-                // Setup initial settings
-                updateSettings("ISK", "USD")
-            }
-        }
     }
 
     private fun updateSettings(localCurrencyId: String, foreignCurrencyId: String) {
