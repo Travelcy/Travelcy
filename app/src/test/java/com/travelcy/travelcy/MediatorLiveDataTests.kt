@@ -11,9 +11,11 @@ import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +23,10 @@ class MediatorLiveDataTests {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
+    @Before
+    fun setup() {
+       Locale.setDefault(Locale.US)
+    }
 
     @Test
     fun testTotalAmountLiveData() {
@@ -35,7 +41,7 @@ class MediatorLiveDataTests {
 
         val totalAmountLiveData = TotalAmountLiveData(billItemWithPersons, localCurrency, foreignCurrency).blockingObserve()
 
-        Assert.assertEquals("ISK4,000 / USD40", totalAmountLiveData)
+        Assert.assertEquals("ISK4,000 / $40", totalAmountLiveData)
     }
 
     @Test
@@ -74,10 +80,10 @@ class MediatorLiveDataTests {
         totalAmountPerPersonLiveData?.forEachIndexed { index, (person, price) ->
             if (index == 0) {
                 Assert.assertEquals("Test person 1", person.name)
-                Assert.assertEquals("ISK3,000 / USD30", price)
+                Assert.assertEquals("ISK3,000 / $30", price)
             } else if (index == 1) {
                 Assert.assertEquals("Test person 2", person.name)
-                Assert.assertEquals("ISK2,500 / USD25", price)
+                Assert.assertEquals("ISK2,500 / $25", price)
             }
         }
     }
