@@ -8,6 +8,6 @@ data class Currency(
     @PrimaryKey var id: String,
     var name: String,
     var exchangeRate: Double,
-    var enabled: Boolean,
-    var sort: Int
+    var enabled: Boolean = true,
+    var sort: Int = 0
 )
