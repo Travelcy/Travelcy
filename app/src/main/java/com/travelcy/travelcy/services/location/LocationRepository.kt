@@ -50,7 +50,7 @@ class LocationRepository(private val activity: MainActivity, private val fusedLo
                     Log.d(TAG, "Got location $it")
                     val currency = getCurrencyFromLocation(it)
                     if (currency != null) {
-                        currencyRepository.changeForeignCurrency(currency)
+                        currencyRepository.changeForeignCurrency(currency.id)
                     }
                     else {
                         Log.d(TAG, "Could not convert location to currency")

@@ -78,40 +78,40 @@ class CurrencyRepository (
         }
     }
 
-    fun changeLocalCurrency(currency: Currency) {
-        Log.d(TAG, "Changing local currency to ${currency.id}")
+    fun changeLocalCurrency(currencyCode: String) {
+        Log.d(TAG, "Changing local currency to ${currencyCode}")
 
-        if (currency.id == localCurrency.value?.id) {
+        if (currencyCode == localCurrency.value?.id) {
             Log.d(TAG, "Local currency already set to value")
             return
         }
 
         // If the foreign currency is the same as the local currency being set we turn them around
-        if (foreignCurrency.value?.id == currency.id) {
+        if (foreignCurrency.value?.id == currencyCode) {
             switchCurrencies()
         }
         else {
             executor.execute {
-                settingsDao.updateLocalCurrencyCode(currency.id)
+                settingsDao.updateLocalCurrencyCode(currencyCode)
             }
         }
     }
 
-    fun changeForeignCurrency(currency: Currency) {
-        Log.d(TAG, "Changing foreign currency to ${currency.id}")
+    fun changeForeignCurrency(currencyCode: String) {
+        Log.d(TAG, "Changing foreign currency to ${currencyCode}")
 
-        if (currency.id == foreignCurrency.value?.id) {
+        if (currencyCode == foreignCurrency.value?.id) {
             Log.d(TAG, "Foreign currency already set to value")
             return
         }
 
         // If the foreign currency is the same as the local currency we turn them around
-        if (localCurrency.value?.id == currency.id) {
+        if (localCurrency.value?.id == currencyCode) {
             switchCurrencies()
         }
         else {
             executor.execute {
-                settingsDao.updateForeignCurrencyCode(currency.id)
+                settingsDao.updateForeignCurrencyCode(currencyCode)
             }
         }
     }
@@ -125,22 +125,41 @@ class CurrencyRepository (
             if (response.isSuccessful) {
                 val currencyWebServiceResponse = response.body()
 
-                val currencies = mutableListOf<Currency>()
+                var i = 0
                 currencyWebServiceResponse?.rates?.forEach {
                     val currency = java.util.Currency.getInstance(it.key)
+                    val currencyModel: Currency? = currencyDao.getRawCurrency(it.key)
 
-                    currencies.add(
-                        Currency(
+                    if (currencyModel != null) {
+                        currencyModel.name = currency.displayName
+                        currencyModel.exchangeRate = it.value
+                        Log.d(TAG, "Updating currency: ${it.key}")
+                        currencyDao.updateCurrency(currencyModel)
+                    }
+                    else {
+                        Log.d(TAG, "Inserting currency: ${it.key}")
+                        currencyDao.insertCurrency(Currency(
                             it.key,
                             currency.displayName,
-                            it.value
-                        )
-                    )
+                            it.value,
+                            true,
+                            i++
+                        ))
+                    }
                 }
-
-                Log.d(TAG,"Inserting new currencies ${currencies.size}")
-                currencyDao.insertAll(currencies)
             }
+        }
+    }
+
+    fun updateCurrency(currency: Currency) {
+        executor.execute {
+            currencyDao.updateCurrency(currency)
+        }
+    }
+
+    fun updateCurrencies(currencies: List<Currency>) {
+        executor.execute {
+            currencyDao.updateCurrencies(currencies)
         }
     }
 
