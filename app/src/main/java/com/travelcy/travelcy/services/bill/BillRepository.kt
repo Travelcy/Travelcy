@@ -26,14 +26,17 @@ class BillRepository (
         return billDao.addBillItemToBill(billItem).toInt()
     }
 
-    fun addBillItem(billItem: BillItem): Int {
-        return addBillItemToBill(billItem)
+    private fun updateBillItem(billItem: BillItem) {
+        billDao.updateBillItem(billItem)
     }
 
-    fun updateBillItem(billItem: BillItem) {
-        executor.execute {
-            billDao.updateBillItem(billItem)
+    fun upsertBillItem(billItem: BillItem): Int {
+        if(billItem.id != null) {
+            updateBillItem(billItem)
+            return billItem.id as Int
         }
+
+        return addBillItemToBill(billItem)
     }
 
     fun getBillItem(billItemId: Int): LiveData<BillItem> {
@@ -50,15 +53,15 @@ class BillRepository (
         }
     }
 
-    fun addPersonToBillItem(billItem: BillItem, person: Person) {
+    fun addPersonToBillItem(billItemId: Int, person: Person) {
         executor.execute {
-            billDao.addPersonToBillItem(billItem, person)
+            billDao.addPersonToBillItem(billItemId, person)
         }
     }
 
-    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
+    fun removePersonFromBillItem(billItemId: Int, person: Person) {
         executor.execute {
-            billDao.removePersonFromBillItem(billItem, person)
+            billDao.removePersonFromBillItem(billItemId, person)
         }
     }
 

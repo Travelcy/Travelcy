@@ -14,6 +14,6 @@ class Person (
     var name: String
 ) {
     @PrimaryKey(autoGenerate = true)
-    var id = 0
+    var id: Int? = null
     var billId: Int = 1
 }

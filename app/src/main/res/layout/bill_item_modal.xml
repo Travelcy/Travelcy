@@ -2,12 +2,13 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="18dp"
     >
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="18dp">
+        >
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/bill_item_description_input"
             android:layout_width="match_parent"
@@ -19,7 +20,6 @@
                 android:inputType="text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -34,7 +34,6 @@
                 android:inputType="numberDecimal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -48,6 +47,7 @@
                 android:inputType="number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 

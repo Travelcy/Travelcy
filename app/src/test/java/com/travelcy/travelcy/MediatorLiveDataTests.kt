@@ -8,6 +8,7 @@ import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
+import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
 import org.junit.Assert
@@ -84,6 +85,39 @@ class MediatorLiveDataTests {
             } else if (index == 1) {
                 Assert.assertEquals("Test person 2", person.name)
                 Assert.assertEquals("ISK2,500 / $25", price)
+            }
+        }
+    }
+
+    @Test
+    fun testPersonsForBillItemLiveData() {
+        val person1 = Person("Test person 1")
+        person1.id = 1
+
+        val person2 = Person("Test person 2")
+        person2.id = 2
+
+        val person3 = Person("Test person 3")
+        person3.id = 3
+
+        val totalPersons = MutableLiveData(listOf(person1, person2, person3))
+
+        val selectedPersons = MutableLiveData(listOf(person1, person2))
+
+        val billItemPersons = PersonsForBillItemLiveData(totalPersons, selectedPersons).blockingObserve()
+
+        Assert.assertNotNull(billItemPersons)
+
+        billItemPersons?.forEachIndexed { index, (person, selected) ->
+            if (index == 0) {
+                Assert.assertEquals("Test person 1", person.name)
+                Assert.assertEquals(true, selected)
+            } else if (index == 1) {
+                Assert.assertEquals("Test person 2", person.name)
+                Assert.assertEquals(true, selected)
+            } else if (index == 2) {
+                Assert.assertEquals("Test person 3", person.name)
+                Assert.assertEquals(false, selected)
             }
         }
     }

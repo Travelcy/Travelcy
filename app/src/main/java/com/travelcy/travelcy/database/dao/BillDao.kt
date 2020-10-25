@@ -31,20 +31,25 @@ interface BillDao {
     @Query("DELETE FROM person_bill_item where billItemId = :billItemId and personId = :personId")
     fun detatchPersonFromBillItem(billItemId: Int, personId: Int)
 
-    @Query("INSERT INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
+    @Query("INSERT OR IGNORE INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
     fun attatchPersonToBillItem(billItemId: Int, personId: Int)
 
     @Insert(onConflict = REPLACE)
     fun addPerson(person: Person): Long
 
-    fun addPersonToBillItem(billItem: BillItem, person: Person) {
-        person.billId = billItem.billId
-        val personId = addPerson(person)
-        attatchPersonToBillItem(billItem.id, personId.toInt())
+    fun addPersonToBillItem(billItemId: Int, person: Person) {
+        person.billId = billItemId
+        var personId = person.id
+        if (personId == null) {
+            personId = addPerson(person).toInt()
+        }
+        attatchPersonToBillItem(billItemId, personId)
     }
 
-    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
-        detatchPersonFromBillItem(billItem.id, person.id)
+    fun removePersonFromBillItem(billItemId: Int, person: Person) {
+        if (person.id != null) {
+            detatchPersonFromBillItem(billItemId, person.id as Int)
+        }
     }
 
     @Query("select * from bill_items where billId = 1")

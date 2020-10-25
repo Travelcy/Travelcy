@@ -17,7 +17,6 @@ import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.R
-import com.travelcy.travelcy.model.BillItem
 import kotlinx.android.synthetic.main.bill_item.view.*
 import kotlinx.android.synthetic.main.fragment_split.view.*
 import kotlinx.android.synthetic.main.labeled_item.view.*
@@ -82,7 +81,7 @@ class SplitFragment : Fragment() {
 
         val fab: FloatingActionButton = root.findViewById(R.id.floating_action_button)
 
-        fab.setOnClickListener { showAddBillItemDialog() }
+        fab.setOnClickListener { showEditBillItemDialog(null) }
 
         return root
     }
@@ -96,23 +95,12 @@ class SplitFragment : Fragment() {
         }
     }
 
-    private fun showAddBillItemDialog() {
-        Log.d(TAG, "showAddBillItemDialog")
-        val billItem = BillItem("", 0.0, 1)
-
-        executor.execute {
-            val id = splitViewModel.addBillItem(billItem)
-            Log.d(TAG, "addedBillItem with id $id")
-            showEditBillItemDialog(id)
-        }
-    }
-
-    private fun showEditBillItemDialog(billItemId: Int) {
+    private fun showEditBillItemDialog(billItemId: Int?) {
         Log.d(TAG, "showEditBillItemDialog(billItemId: $id)")
 
         val fragmentManager = activity?.let {
 
-            val newFragment = BillItemModal(billItemId, splitViewModel)
+            val newFragment = BillItemModal(billItemId, splitViewModel, executor)
 
             newFragment.show(it.supportFragmentManager, "billItemDialog")
         }

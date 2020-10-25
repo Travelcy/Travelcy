@@ -20,16 +20,16 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
 
     val totalAmountPerPerson = TotalAmountPerPersonLiveData(persons, billItemsWithPersons, localCurrency, foreignCurrency)
 
-    fun addBillItem(billItem: BillItem): Int {
-        return billRepository.addBillItem(billItem)
+    fun upsertBillItem(billItem: BillItem): Int {
+        return billRepository.upsertBillItem(billItem)
     }
 
-    fun updateBillItem(billItem: BillItem) {
-        return billRepository.updateBillItem(billItem)
-    }
+    fun getOrGenerateBillItem(billItemId: Int?): LiveData<BillItem> {
+        if (billItemId != null) {
+            return billRepository.getBillItem(billItemId)
+        }
 
-    fun getBillItem(billItemId: Int): LiveData<BillItem> {
-        return billRepository.getBillItem(billItemId)
+        return MutableLiveData(BillItem("", 0.0, 1))
     }
 
     fun deleteBillItem(billItem: BillItem) {
@@ -37,25 +37,19 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
     }
 
 
-    fun getPersonsForBillItem(billItemId: Int): MediatorLiveData<Pair<List<Person>, List<Person>>> {
-        val billPerson = billRepository.getPersonsForBillItem(billItemId)
-        return MediatorLiveData<Pair<List<Person>, List<Person>>>().apply {
-            addSource(persons) {
-                value = Pair(it ?: emptyList(), billPerson.value ?: emptyList())
-            }
+    fun getPersonsForBillItem(billItemId: Int?): MediatorLiveData<List<Pair<Person, Boolean>>> {
+        val billPersons = if (billItemId != null) {billRepository.getPersonsForBillItem(billItemId)} else {
+            MutableLiveData(emptyList())}
 
-            addSource(billPerson) {
-                value = Pair(persons.value ?: emptyList(), it ?: emptyList())
-            }
-        }
+        return PersonsForBillItemLiveData(persons, billPersons)
     }
 
-    fun addPersonToBillItem(billItem: BillItem, person: Person) {
-        return billRepository.addPersonToBillItem(billItem, person)
+    fun addPersonToBillItem(billItemId: Int, person: Person) {
+        return billRepository.addPersonToBillItem(billItemId, person)
     }
 
-    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
-        return billRepository.removePersonFromBillItem(billItem, person)
+    fun removePersonFromBillItem(billItemId: Int, person: Person) {
+        return billRepository.removePersonFromBillItem(billItemId, person)
     }
 
     fun updatePerson(person: Person) {
@@ -65,4 +59,5 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
     fun formatPrice(amount: Double): String {
         return FormatUtils.formatPrice(amount, localCurrency.value, foreignCurrency.value)
     }
+
 }

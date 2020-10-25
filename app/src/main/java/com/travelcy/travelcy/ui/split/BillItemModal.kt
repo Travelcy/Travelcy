@@ -14,12 +14,16 @@ import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.utils.FormatUtils
 import kotlinx.android.synthetic.main.bill_item_modal.view.*
 import androidx.recyclerview.widget.RecyclerView
+import com.travelcy.travelcy.model.Person
+import java.util.concurrent.Executor
 
-class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel) : DialogFragment() {
-    private val billItem = splitViewModel.getBillItem(billItemId)
-    private val billItemPersons = splitViewModel.getPersonsForBillItem(billItemId)
+class BillItemModal(private val billItemId: Int?, private val splitViewModel: SplitViewModel, private val executor: Executor) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val billItem = splitViewModel.getOrGenerateBillItem(billItemId)
+
+        val billItemPersons = splitViewModel.getPersonsForBillItem(billItemId)
+
         return activity?.let { fragmentActivity ->
             // Use the Builder class for convenient dialog construction
             val builder = MaterialAlertDialogBuilder(fragmentActivity)
@@ -37,6 +41,7 @@ class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel)
             }
 
             var changedBillItem: BillItem? = null
+            var changedSelectedPersons: MutableList<Pair<Person, Boolean>> = mutableListOf()
 
             billItem.observe(this, Observer {
                 if (it != null) {
@@ -44,12 +49,14 @@ class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel)
 
                     if (billItemDescription.text.toString() !== changedBillItem?.description) {
                         billItemDescription.setText(changedBillItem?.description ?: "")
+                        billItemDescription.setSelection(billItemDescription.text?.length ?: 0)
                     }
 
                     billItemDescription.doAfterTextChanged { text ->  changedBillItem?.description = text.toString()}
 
                     if (billItemAmount.text.toString() !== changedBillItem?.amount.toString()) {
                         billItemAmount.setText(changedBillItem?.amount.toString() ?: "")
+                        billItemAmount.setSelection(billItemAmount.text?.length ?: 0)
                     }
 
                     billItemAmount.doAfterTextChanged { text ->  changedBillItem?.amount = FormatUtils.editTextToDouble(text)}
@@ -57,26 +64,34 @@ class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel)
 
                     if (billItemQuantity.text.toString() !== changedBillItem?.quantity.toString()) {
                         billItemQuantity.setText(changedBillItem?.quantity.toString() ?: "")
+                        billItemQuantity.setSelection(billItemQuantity.text?.length ?: 0)
                     }
 
                     billItemQuantity.doAfterTextChanged { text ->  changedBillItem?.quantity = FormatUtils.editTextToInt(text)}
 
                 }
+            })
 
-                billItemPersons.observe(this, Observer { personsPair ->
-                    val (persons, selectedPersons) = personsPair
+            billItemPersons.observe(this, Observer { billItemPersons ->
+                changedSelectedPersons = billItemPersons.toMutableList()
 
-                    val viewAdapter = PersonAdapter(context, persons, selectedPersons, billItem.value, splitViewModel)
+                val viewAdapter = PersonAdapter(context, changedSelectedPersons)
 
-                    recyclerView.adapter = viewAdapter
-                })
+                recyclerView.adapter = viewAdapter
             })
 
             builder.setView(root)
                 .setPositiveButton(R.string.save,
                     DialogInterface.OnClickListener { dialog, id ->
                         if (changedBillItem != null) {
-                            splitViewModel.updateBillItem(changedBillItem as BillItem)
+                            executor.execute {
+                                val billItemId = splitViewModel.upsertBillItem(changedBillItem as BillItem)
+
+                                changedSelectedPersons.forEach {(person, isSelected) ->
+                                    if (isSelected) splitViewModel.addPersonToBillItem(billItemId, person)
+                                    else splitViewModel.removePersonFromBillItem(billItemId, person)
+                                }
+                            }
                         }
                     })
                 .setNeutralButton(R.string.delete,
