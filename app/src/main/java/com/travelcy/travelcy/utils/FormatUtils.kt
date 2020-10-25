@@ -16,6 +16,18 @@ object FormatUtils {
         return decimalFormat.format(amount)
     }
 
+    fun formatPrice(amount: Double, local: com.travelcy.travelcy.model.Currency?, foreign: com.travelcy.travelcy.model.Currency?): String {
+        var foreignAmount: Double? = null
+        if (foreign != null) {
+            foreignAmount = foreign.exchangeRate * amount
+        }
+
+        val formattedLocalAmount = FormatUtils.formatCurrency(amount, local?.id)
+        val formattedForeignAmount = if (foreignAmount != null) {" / " + formatCurrency(foreignAmount, foreign?.id)} else {""}
+
+        return "$formattedLocalAmount$formattedForeignAmount"
+    }
+
     fun formatCurrency(amount: Double, currencyCode: String?): String {
         if (currencyCode == null) return amount.toString()
 
