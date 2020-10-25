@@ -6,15 +6,18 @@ import android.os.Bundle
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.travelcy.travelcy.R
 import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.utils.FormatUtils
 import kotlinx.android.synthetic.main.bill_item_modal.view.*
+import androidx.recyclerview.widget.RecyclerView
 
 class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel) : DialogFragment() {
-    private val billItemWithPersons = splitViewModel.getBillItem(billItemId)
+    private val billItem = splitViewModel.getBillItem(billItemId)
+    private val billItemPersons = splitViewModel.getPersonsForBillItem(billItemId)
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let { fragmentActivity ->
@@ -23,48 +26,63 @@ class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel)
             val inflater = requireActivity().layoutInflater;
             val root = inflater.inflate(R.layout.bill_item_modal, null)
 
+            val viewManager = LinearLayoutManager(this.context)
+
             val billItemDescription: TextInputEditText = root.bill_item_description
             val billItemAmount: TextInputEditText = root.bill_item_amount
             val billItemQuantity: TextInputEditText = root.bill_item_quantity
+            val recyclerView: RecyclerView = root.bill_item_modal_persons.apply {
+                setHasFixedSize(true)
+                layoutManager = viewManager
+            }
 
-            var billItem: BillItem? = null
+            var changedBillItem: BillItem? = null
 
-            billItemWithPersons.observe(this, Observer {
+            billItem.observe(this, Observer {
                 if (it != null) {
-                    billItem = it.billItem
+                    changedBillItem = it
 
-                    if (billItemDescription.text.toString() !== billItem?.description) {
-                        billItemDescription.setText(billItem?.description ?: "")
+                    if (billItemDescription.text.toString() !== changedBillItem?.description) {
+                        billItemDescription.setText(changedBillItem?.description ?: "")
                     }
 
-                    billItemDescription.doAfterTextChanged { text ->  billItem?.description = text.toString()}
+                    billItemDescription.doAfterTextChanged { text ->  changedBillItem?.description = text.toString()}
 
-                    if (billItemAmount.text.toString() !== billItem?.amount.toString()) {
-                        billItemAmount.setText(billItem?.amount.toString() ?: "")
+                    if (billItemAmount.text.toString() !== changedBillItem?.amount.toString()) {
+                        billItemAmount.setText(changedBillItem?.amount.toString() ?: "")
                     }
 
-                    billItemAmount.doAfterTextChanged { text ->  billItem?.amount = FormatUtils.editTextToDouble(text)}
+                    billItemAmount.doAfterTextChanged { text ->  changedBillItem?.amount = FormatUtils.editTextToDouble(text)}
 
 
-                    if (billItemQuantity.text.toString() !== billItem?.quantity.toString()) {
-                        billItemQuantity.setText(billItem?.quantity.toString() ?: "")
+                    if (billItemQuantity.text.toString() !== changedBillItem?.quantity.toString()) {
+                        billItemQuantity.setText(changedBillItem?.quantity.toString() ?: "")
                     }
 
-                    billItemQuantity.doAfterTextChanged { text ->  billItem?.quantity = FormatUtils.editTextToInt(text)}
+                    billItemQuantity.doAfterTextChanged { text ->  changedBillItem?.quantity = FormatUtils.editTextToInt(text)}
+
                 }
+
+                billItemPersons.observe(this, Observer { personsPair ->
+                    val (persons, selectedPersons) = personsPair
+
+                    val viewAdapter = PersonAdapter(context, persons, selectedPersons)
+
+                    recyclerView.adapter = viewAdapter
+                })
             })
 
             builder.setView(root)
                 .setPositiveButton(R.string.save,
                     DialogInterface.OnClickListener { dialog, id ->
-                        if (billItem != null) {
-                            splitViewModel.updateBillItem(billItem as BillItem)
+                        if (changedBillItem != null) {
+                            splitViewModel.updateBillItem(changedBillItem as BillItem)
                         }
                     })
                 .setNeutralButton(R.string.delete,
                     DialogInterface.OnClickListener { dialog, id ->
-                        if (billItemWithPersons.value?.billItem != null) {
-                            splitViewModel.deleteBillItem(billItemWithPersons.value?.billItem!!)
+                        if (billItem.value != null) {
+                            splitViewModel.deleteBillItem(billItem.value!!)
                         }
                     })
 

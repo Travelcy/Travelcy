@@ -1,16 +1,26 @@
 package com.travelcy.travelcy.ui.split
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
+import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.bill.BillRepository
 import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.utils.FormatUtils
 
 class SplitViewModel(private val billRepository: BillRepository, private val currencyRepository: CurrencyRepository) : ViewModel() {
 
-    val billItemsWithPersons = billRepository.billItemsWithPersons
+    private val billWithItems = billRepository.billWithItems
+
+    val billItemsWithPersons = Transformations.map(billWithItems) {
+        it?.items ?: emptyList()
+    }
+
+    val persons = Transformations.map(billWithItems) {
+        it?.persons ?: emptyList()
+    }
 
     private val foreignCurrency: LiveData<Currency> = currencyRepository.foreignCurrency
     private val localCurrency: LiveData<Currency> = currencyRepository.localCurrency
@@ -23,14 +33,13 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
         }
 
         addSource(foreignCurrency) {
-           recalculateTotal(billItemsWithPersons.value, it)
+            recalculateTotal(billItemsWithPersons.value, it)
         }
 
         addSource(billItemsWithPersons) {
             recalculateTotal(it, foreignCurrency.value)
         }
     }
-
 
     fun addBillItem(billItem: BillItem): Int {
         return billRepository.addBillItem(billItem)
@@ -40,12 +49,31 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
         return billRepository.updateBillItem(billItem)
     }
 
-    fun getBillItem(billItemId: Int): LiveData<BillItemWithPersons> {
+    fun getBillItem(billItemId: Int): LiveData<BillItem> {
         return billRepository.getBillItem(billItemId)
     }
 
     fun deleteBillItem(billItem: BillItem) {
         return billRepository.deleteBillItem(billItem)
+    }
+
+
+
+    fun getPersonsForBillItem(billItemId: Int): MediatorLiveData<Pair<List<Person>, List<Person>>> {
+        val billPerson = billRepository.getPersonsForBillItem(billItemId)
+        return MediatorLiveData<Pair<List<Person>, List<Person>>>().apply {
+            addSource(persons) {
+                value = Pair(it ?: emptyList(), billPerson.value ?: emptyList())
+            }
+
+            addSource(billPerson) {
+                value = Pair(persons.value ?: emptyList(), it ?: emptyList())
+            }
+        }
+    }
+
+    fun addPersonToBillItem(billItem: BillItem, person: Person) {
+        return billRepository.addPersonToBillItem(billItem, person)
     }
 
     fun formatPrice(amount: Double): String {

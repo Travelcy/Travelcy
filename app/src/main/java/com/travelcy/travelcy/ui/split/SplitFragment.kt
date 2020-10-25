@@ -49,6 +49,7 @@ class SplitFragment : Fragment() {
             billItemsView.removeAllViews()
 
             billItemsWithPerson.forEach {
+                Log.e("BLA", it.persons.size.toString())
                 val billItem = it.billItem
                 val billItemView: RelativeLayout =
                     inflater.inflate(R.layout.bill_item, null) as RelativeLayout

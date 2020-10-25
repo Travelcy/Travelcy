@@ -1,26 +1,18 @@
 package com.travelcy.travelcy.services.bill
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import com.travelcy.travelcy.database.dao.BillDao
 import com.travelcy.travelcy.model.Bill
 import com.travelcy.travelcy.model.BillItem
-import com.travelcy.travelcy.model.BillItemWithPersons
+import com.travelcy.travelcy.model.Person
 import java.util.concurrent.Executor
 
 class BillRepository (
     private val billDao: BillDao,
     private val executor: Executor
 ) {
-    private val billWithItems = billDao.getBillWithItems()
-
-    val billItemsWithPersons = Transformations.map(billWithItems) {
-        it?.items ?: emptyList()
-    }
-
-    val billPersons = Transformations.map(billWithItems) {
-        it?.persons ?: emptyList()
-    }
+    val persons = billDao.getAllPersons()
+    val billWithItems = billDao.getBillWithItems()
 
     init {
         executor.execute {
@@ -51,13 +43,23 @@ class BillRepository (
         }
     }
 
-    fun getBillItem(billItemId: Int): LiveData<BillItemWithPersons> {
-        return billDao.getBillItemWithPersons(billItemId)
+    fun getBillItem(billItemId: Int): LiveData<BillItem> {
+        return billDao.getBillItem(billItemId)
+    }
+
+    fun getPersonsForBillItem(billItemId: Int): LiveData<List<Person>> {
+        return billDao.getPersonsForBillItem(billItemId)
     }
 
     fun deleteBillItem(billItem: BillItem) {
         executor.execute {
             billDao.deleteBillItem(billItem)
+        }
+    }
+
+    fun addPersonToBillItem(billItem: BillItem, person: Person) {
+        executor.execute {
+            billDao.addPersonToBillItem(billItem, person)
         }
     }
 }

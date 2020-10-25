@@ -32,23 +32,26 @@ interface BillDao {
     fun attatchPersonToBillItem(billItemId: Int, personId: Int)
 
     @Insert(onConflict = REPLACE)
-    fun addPerson(person: Person)
+    fun addPerson(person: Person): Long
 
     fun addPersonToBillItem(billItem: BillItem, person: Person) {
         person.billId = billItem.billId
-        addPerson(person)
-        attatchPersonToBillItem(billItem.id, person.id)
+        val personId = addPerson(person)
+        attatchPersonToBillItem(billItem.id, personId.toInt())
     }
 
     @Transaction
     @Query("select * from bills where id = 1")
     fun getBillWithItems(): LiveData<BillWithItems>
 
-    @Query("select * from bill_items")
-    fun getBillItemsWithPerson() : List<BillItemWithPersons>
+    @Query("select * from persons p left join person_bill_item pi on pi.personId = p.id where pi.billItemId = :billItemId")
+    fun getPersonsForBillItem(billItemId: Int): LiveData<List<Person>>
+
+    @Query("select * from persons")
+    fun getAllPersons(): LiveData<List<Person>>
 
     @Query("select * from bill_items where id = :billItemId")
-    fun getBillItemWithPersons(billItemId: Int): LiveData<BillItemWithPersons>
+    fun getBillItem(billItemId: Int): LiveData<BillItem>
 
     @Delete
     fun deleteBillItem(billItem: BillItem)
