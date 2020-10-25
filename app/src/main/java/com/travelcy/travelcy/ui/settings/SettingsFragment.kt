@@ -9,6 +9,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -23,6 +25,43 @@ class SettingsFragment : Fragment() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var settingsViewModel: SettingsViewModel
 
+    private val itemTouchHelper by lazy {
+        // 1. Note that I am specifying all 4 directions.
+        //    Specifying START and END also allows
+        //    more organic dragging than just specifying UP and DOWN.
+        val simpleItemTouchCallback =
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or
+                        ItemTouchHelper.DOWN or
+                        ItemTouchHelper.START or
+                        ItemTouchHelper.END, 0) {
+
+                override fun onMove(recyclerView: RecyclerView,
+                                    viewHolder: RecyclerView.ViewHolder,
+                                    target: RecyclerView.ViewHolder): Boolean {
+
+                    val adapter = recyclerView.adapter as SettingsCurrenciesAdapter
+                    val from = viewHolder.adapterPosition
+                    val to = target.adapterPosition
+                    // 2. Update the backing model. Custom implementation in
+                    //    MainRecyclerViewAdapter. You need to implement
+                    //    reordering of the backing model inside the method.
+                    adapter.moveItem(from, to)
+                    // 3. Tell adapter to render the model update.
+                    adapter.notifyItemMoved(from, to)
+
+                    return true
+                }
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder,
+                                      direction: Int) {
+                    // 4. Code block for horizontal swipe.
+                    //    ItemTouchHelper handles horizontal swipe as well, but
+                    //    it is not relevant with reordering. Ignoring here.
+                }
+            }
+        ItemTouchHelper(simpleItemTouchCallback)
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -34,7 +73,7 @@ class SettingsFragment : Fragment() {
         val mainApplication: MainApplication =  activity.application as MainApplication
         settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory(mainApplication.getCurrencyRepository())).get(SettingsViewModel::class.java)
 
-        val viewManager = LinearLayoutManager(this.context)
+        val viewManager = LinearLayoutManager(context)
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
 
         val recyclerView: RecyclerView = root.settings_currency_list.apply {
@@ -42,8 +81,10 @@ class SettingsFragment : Fragment() {
             layoutManager = viewManager
         }
 
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+
         settingsViewModel.currencies.observe(viewLifecycleOwner, Observer {
-            val viewAdapter = SettingsCurrenciesAdapter(context, settingsViewModel)
+            val viewAdapter = SettingsCurrenciesAdapter(itemTouchHelper, context, settingsViewModel)
 
             recyclerView.adapter = viewAdapter
         })

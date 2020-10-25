@@ -4,5 +4,8 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorSecondary">@color/colorPrimary</item>
+        <item name="colorSurface">#fff</item>
+        <item name="colorOnSurface">@color/colorPrimaryDark</item>
     </style>
 </resources>

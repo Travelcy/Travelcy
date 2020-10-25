@@ -2,8 +2,10 @@ package com.travelcy.travelcy.ui.settings
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.travelcy.travelcy.R
 import com.travelcy.travelcy.model.Currency
@@ -15,7 +17,7 @@ class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout,
     }
 }
 
-class SettingsCurrenciesAdapter(private val context: Context?, private val settingsViewModel: SettingsViewModel) :
+class SettingsCurrenciesAdapter(private val itemTouchHelper: ItemTouchHelper, private val context: Context?, private val settingsViewModel: SettingsViewModel) :
     RecyclerView.Adapter<SettingsCurrenciesViewHolder>() {
 
     // Create new views (invoked by the layout manager)
@@ -26,7 +28,16 @@ class SettingsCurrenciesAdapter(private val context: Context?, private val setti
             .inflate(R.layout.settings_currency_list_item, parent, false) as RelativeLayout
         // set the view's size, margins, paddings and layout parameters
 
-        return SettingsCurrenciesViewHolder(personLayout, settingsViewModel)
+        val viewHolder = SettingsCurrenciesViewHolder(personLayout, settingsViewModel)
+
+        viewHolder.itemView.settings_currency_list_handle.setOnTouchListener { view, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                itemTouchHelper.startDrag(viewHolder)
+            }
+            return@setOnTouchListener true
+        }
+
+        return viewHolder
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -36,6 +47,10 @@ class SettingsCurrenciesAdapter(private val context: Context?, private val setti
 
     // We need to add 1 to account for the add user item at the end
     override fun getItemCount() = settingsViewModel.currencies.value!!.size
+
+    fun moveItem(from: Int, to: Int) {
+        println("MOVE ITEM from ${from} to ${to}")
+    }
 
     companion object {
         const val TAG = "SettingsCurrenciesAdapter"
