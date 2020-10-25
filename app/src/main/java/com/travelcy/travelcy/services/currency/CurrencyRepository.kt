@@ -2,6 +2,7 @@ package com.travelcy.travelcy.services.currency
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
@@ -16,7 +17,7 @@ class CurrencyRepository (
     private val executor: Executor
 ) {
     val settings: LiveData<Settings> = settingsDao.getSettings()
-    val currencies = currencyDao.loadCurrencies()
+    val currenciesLoaded = MutableLiveData(false)
 
     private val _localCurrencyCode: LiveData<String> = Transformations.map(settings) {
         Log.d(TAG, "Settings changed, local currency code changed to ${it?.localCurrencyCode ?: "undefined"}")
@@ -32,27 +33,24 @@ class CurrencyRepository (
 
     private val foreignCurrencyCode = Transformations.distinctUntilChanged(_foreignCurrencyCode)
 
-
-    val localCurrency = Transformations.switchMap(localCurrencyCode) {
-        if (it != null) { currencyDao.getCurrency(it) } else { null }
+    val currencies = Transformations.switchMap<Boolean, List<Currency>>(currenciesLoaded) {currenciesLoaded ->
+        if(currenciesLoaded) {currencyDao.loadCurrencies()} else {MutableLiveData()}
     }
 
-    val foreignCurrency = Transformations.switchMap(foreignCurrencyCode) {
-        if (it != null) { currencyDao.getCurrency(it) } else { null }
-    }
+    val localCurrency = CurrencyLiveData(localCurrencyCode, currencies)
+
+    val foreignCurrency = CurrencyLiveData(foreignCurrencyCode, currencies)
 
     init {
-        localCurrencyCode.observeForever {
-            if (it != null) {
-                updateCurrencies(it)
+        executor.execute {
+            if (currencyDao.hasCurrencies()) {
+                currenciesLoaded.postValue(true)
             }
         }
 
-        executor.execute {
-            if (!settingsDao.hasSettings()) {
-                Log.d(TAG, "No settings in database, setting up initial settings")
-                // Setup initial settings
-                updateSettings("ISK", "USD")
+        localCurrencyCode.observeForever {
+            if (it != null) {
+                updateCurrencies(it)
             }
         }
     }
@@ -133,11 +131,9 @@ class CurrencyRepository (
                     if (currencyModel != null) {
                         currencyModel.name = currency.displayName
                         currencyModel.exchangeRate = it.value
-                        Log.d(TAG, "Updating currency: ${it.key}")
                         currencyDao.updateCurrency(currencyModel)
                     }
                     else {
-                        Log.d(TAG, "Inserting currency: ${it.key}")
                         currencyDao.insertCurrency(Currency(
                             it.key,
                             currency.displayName,
@@ -153,6 +149,8 @@ class CurrencyRepository (
                 if (currencyCodes != null && currencyCodes.isNotEmpty()) {
                     currencyDao.deleteOtherCurrencies(currencyCodes)
                 }
+
+                currenciesLoaded.postValue(true)
             }
         }
     }

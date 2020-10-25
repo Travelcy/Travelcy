@@ -9,7 +9,7 @@ import com.travelcy.travelcy.model.*
 @Dao
 interface BillDao {
     @Insert(onConflict = REPLACE)
-    fun updateBill(bill: Bill)
+    fun createBill(bill: Bill)
 
     @Query("SELECT COUNT(*) FROM bills")
     fun hasBill(): Boolean

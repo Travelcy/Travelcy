@@ -127,7 +127,9 @@ class ConvertFragment : Fragment() {
 
         root.to_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                convertViewModel.setForeignCurrency(position)
+                if (position != convertViewModel.positionOfForeignCurrency()) {
+                    convertViewModel.setForeignCurrency(position)
+                }
         }
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing

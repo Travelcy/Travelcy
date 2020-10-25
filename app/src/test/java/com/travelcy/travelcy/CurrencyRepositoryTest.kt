@@ -20,8 +20,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.HttpURLConnection
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
 class CurrencyDaoMock: CurrencyDao {
@@ -116,11 +115,17 @@ class SettingsDaoMock: SettingsDao {
 
 }
 
+class SynchronousExecutor : Executor {
+    override fun execute(runnable: Runnable) {
+        runnable.run()
+    }
+}
+
 class CurrencyRepositoryTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    private val executorService: SynchronousExecutor = SynchronousExecutor()
 
     // Mock server to mock the api
     private var mockWebServer = MockWebServer()
@@ -128,6 +133,8 @@ class CurrencyRepositoryTest {
     private lateinit var currencyWebService: CurrencyWebService
 
     private lateinit var currencyRepository: CurrencyRepository
+
+    private lateinit var response: MockResponse
 
     @Before
     fun setup() {
@@ -158,7 +165,7 @@ class CurrencyRepositoryTest {
             .put("base", "ISK")
             .put("date", "2020-10-09")
 
-        val response = MockResponse()
+        response = MockResponse()
             .setResponseCode(HttpURLConnection.HTTP_OK)
             .addHeader("Content-Type", "application/json")
             .setBody(jsonResponse.toString())
@@ -168,15 +175,6 @@ class CurrencyRepositoryTest {
         currencyWebService = retrofit.create(CurrencyWebService::class.java)
 
         currencyRepository = CurrencyRepository(currencyWebService, CurrencyDaoMock(), SettingsDaoMock(), executorService)
-    }
-
-    @After
-    fun teardown() {
-    }
-
-    @Test
-    fun testSettingsInitialitaton() {
-
     }
 
     @Test
@@ -196,10 +194,9 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!.id)
+        mockWebServer.enqueue(response)
 
-        // This is a hack since the currency repository is executing on a background thread
-        executorService.awaitTermination(1, TimeUnit.SECONDS)
+        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!.id)
 
         val localCurrency = currencyRepository.localCurrency.blockingObserve()
         val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()
@@ -216,10 +213,9 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeForeignCurrency(localCurrencyBefore!!.id)
+        mockWebServer.enqueue(response)
 
-        // This is a hack since the currency repository is executing on a background thread
-        executorService.awaitTermination(1, TimeUnit.SECONDS)
+        currencyRepository.changeForeignCurrency(localCurrencyBefore!!.id)
 
         val localCurrency = currencyRepository.localCurrency.blockingObserve()
         val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()

@@ -8,6 +8,7 @@ import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
+import com.travelcy.travelcy.services.currency.CurrencyLiveData
 import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
@@ -120,6 +121,36 @@ class MediatorLiveDataTests {
                 Assert.assertEquals(false, selected)
             }
         }
+    }
+
+    @Test
+    fun testCurrencyLiveData() {
+        val currency = Currency("ISK", "Króna", 1.0)
+        val currency2 = Currency("USD", "Dollar", 0.1)
+        val currency3 = Currency("NOK", "Norsk krona", 0.1)
+
+        val currencies = MutableLiveData(listOf(currency, currency2, currency3))
+
+        val currencyCode = MutableLiveData("USD")
+
+        val retrievedCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+
+        Assert.assertNotNull(retrievedCurrency)
+
+        Assert.assertEquals("USD", retrievedCurrency?.id)
+
+        currencyCode.postValue("ISK")
+
+        val retrievedSecondCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+
+        Assert.assertEquals("ISK", retrievedSecondCurrency?.id)
+
+        currencies.postValue(listOf(currency2, currency3))
+
+        val shouldBeNullCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+
+
+        Assert.assertNull(shouldBeNullCurrency)
     }
 
 

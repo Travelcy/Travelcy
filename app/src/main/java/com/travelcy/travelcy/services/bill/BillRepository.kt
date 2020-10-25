@@ -2,7 +2,6 @@ package com.travelcy.travelcy.services.bill
 
 import androidx.lifecycle.LiveData
 import com.travelcy.travelcy.database.dao.BillDao
-import com.travelcy.travelcy.model.Bill
 import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.Person
 import java.util.concurrent.Executor
@@ -13,14 +12,6 @@ class BillRepository (
 ) {
     val billItems = billDao.getBillItemsWithPersons()
     val persons = billDao.getAllPersons()
-
-    init {
-        executor.execute {
-            if (!billDao.hasBill()) {
-                billDao.updateBill(Bill())
-            }
-        }
-    }
 
     private fun addBillItemToBill(billItem: BillItem): Int {
         return billDao.addBillItemToBill(billItem).toInt()
