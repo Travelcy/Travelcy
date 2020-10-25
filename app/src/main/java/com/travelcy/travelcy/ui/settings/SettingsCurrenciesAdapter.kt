@@ -19,21 +19,20 @@ class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout,
         constraintLayout.settings_currency_list_switch.isChecked = currency.enabled
 
         constraintLayout.settings_currency_list_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            currency.enabled = isChecked
-            if (!isChecked) {
-                currency.sort = Int.MAX_VALUE // Sort disabled to to bottom
+            if (currency.enabled != isChecked) {
+                currency.enabled = isChecked
+                settingsViewModel.updateCurrency(currency)
             }
-            settingsViewModel.updateCurrency(currency)
         }
     }
 }
 
 class SettingsCurrenciesAdapter(
     private val itemTouchHelper: ItemTouchHelper,
-    private val settingsViewModel: SettingsViewModel,
-    private val currencies: MutableList<Currency>
+    private val settingsViewModel: SettingsViewModel
 ) :
     RecyclerView.Adapter<SettingsCurrenciesViewHolder>() {
+    var currencies: MutableList<Currency> = mutableListOf()
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
@@ -44,6 +43,8 @@ class SettingsCurrenciesAdapter(
         // set the view's size, margins, paddings and layout parameters
 
         val viewHolder = SettingsCurrenciesViewHolder(personLayout, settingsViewModel)
+
+        viewHolder.setIsRecyclable(false);
 
         viewHolder.itemView.settings_currency_list_handle.setOnTouchListener { view, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {

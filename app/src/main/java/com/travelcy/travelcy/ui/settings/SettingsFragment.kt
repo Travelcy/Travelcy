@@ -88,13 +88,15 @@ class SettingsFragment : Fragment() {
 
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
+        val viewAdapter = SettingsCurrenciesAdapter(itemTouchHelper, settingsViewModel)
+        recyclerView.adapter = viewAdapter
+
         settingsViewModel.currencies.observe(viewLifecycleOwner, Observer {
             val currenciesMutable = it.toMutableList()
             currenciesMutable.sortBy { el -> el.sort }
-            val viewAdapter = SettingsCurrenciesAdapter(itemTouchHelper, settingsViewModel, currenciesMutable)
 
-            recyclerView.adapter = viewAdapter
-
+            viewAdapter.currencies = currenciesMutable
+            viewAdapter.notifyDataSetChanged()
         })
 
         return root
