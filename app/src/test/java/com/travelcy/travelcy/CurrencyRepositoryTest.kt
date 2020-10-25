@@ -63,6 +63,10 @@ class CurrencyDaoMock: CurrencyDao {
     override fun updateCurrencies(currencies: List<Currency>) {
         // Do nothing, were not testing the dao here
     }
+
+    override fun deleteOtherCurrencies(currencyCodes: List<String>) {
+        // Do nothing, were not testing the dao here
+    }
 }
 
 class SettingsDaoMock: SettingsDao {

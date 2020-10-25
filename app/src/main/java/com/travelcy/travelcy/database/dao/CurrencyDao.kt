@@ -1,10 +1,7 @@
 package com.travelcy.travelcy.database.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.travelcy.travelcy.model.Currency
 
 @Dao
@@ -29,4 +26,7 @@ interface CurrencyDao {
 
     @Update
     fun updateCurrencies(currencies: List<Currency>)
+
+    @Query("delete from currency where id not in (:currencyCodes)")
+    fun deleteOtherCurrencies(currencyCodes: List<String>)
 }

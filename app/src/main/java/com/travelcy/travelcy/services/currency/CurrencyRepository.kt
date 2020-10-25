@@ -147,6 +147,12 @@ class CurrencyRepository (
                         ))
                     }
                 }
+
+                val currencyCodes = currencyWebServiceResponse?.rates?.map { it.key }
+
+                if (currencyCodes != null && currencyCodes.isNotEmpty()) {
+                    currencyDao.deleteOtherCurrencies(currencyCodes)
+                }
             }
         }
     }
