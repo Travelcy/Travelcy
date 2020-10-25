@@ -11,8 +11,8 @@ class BillRepository (
     private val billDao: BillDao,
     private val executor: Executor
 ) {
+    val billItems = billDao.getBillItemsWithPersons()
     val persons = billDao.getAllPersons()
-    val billWithItems = billDao.getBillWithItems()
 
     init {
         executor.execute {
@@ -23,14 +23,7 @@ class BillRepository (
     }
 
     private fun addBillItemToBill(billItem: BillItem): Int {
-        if (billWithItems.value != null) {
-            val id = billDao.addBillItemToBill(billItem, billWithItems.value?.bill!!)
-
-            return id.toInt()
-        }
-
-        return -1
-        // TODO error handling
+        return billDao.addBillItemToBill(billItem).toInt()
     }
 
     fun addBillItem(billItem: BillItem): Int {

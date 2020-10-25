@@ -11,15 +11,8 @@ import com.travelcy.travelcy.utils.FormatUtils
 
 class SplitViewModel(private val billRepository: BillRepository, private val currencyRepository: CurrencyRepository) : ViewModel() {
 
-    private val billWithItems = billRepository.billWithItems
-
-    val billItemsWithPersons = Transformations.map(billWithItems) {
-        it?.items ?: emptyList()
-    }
-
-    val persons = Transformations.map(billWithItems) {
-        it?.persons ?: emptyList()
-    }
+    val billItemsWithPersons = billRepository.billItems
+    val persons = billRepository.persons
 
     private val foreignCurrency: LiveData<Currency> = currencyRepository.foreignCurrency
     private val localCurrency: LiveData<Currency> = currencyRepository.localCurrency

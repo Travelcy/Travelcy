@@ -15,7 +15,7 @@ interface BillDao {
     fun hasBill(): Boolean
 
     @Query("SELECT * FROM bills where id = 1")
-    fun getBill(): Bill
+    fun getBill(): LiveData<Bill>
 
     @Insert(onConflict = REPLACE)
     fun addBillItem(billItem: BillItem): Long
@@ -23,8 +23,8 @@ interface BillDao {
     @Update
     fun updateBillItem(billItem: BillItem)
 
-    fun addBillItemToBill(billItem: BillItem, bill: Bill): Long {
-        billItem.billId = bill.id
+    fun addBillItemToBill(billItem: BillItem): Long {
+        billItem.billId = 1
         return addBillItem(billItem)
     }
 
@@ -47,9 +47,8 @@ interface BillDao {
         detatchPersonFromBillItem(billItem.id, person.id)
     }
 
-    @Transaction
-    @Query("select * from bills where id = 1")
-    fun getBillWithItems(): LiveData<BillWithItems>
+    @Query("select * from bill_items where billId = 1")
+    fun getBillItemsWithPersons(): LiveData<List<BillItemWithPersons>>
 
     @Query("select * from persons p left join person_bill_item pi on pi.personId = p.id where pi.billItemId = :billItemId")
     fun getPersonsForBillItem(billItemId: Int): LiveData<List<Person>>
