@@ -66,7 +66,7 @@ class BillItemModal(billItemId: Int, private val splitViewModel: SplitViewModel)
                 billItemPersons.observe(this, Observer { personsPair ->
                     val (persons, selectedPersons) = personsPair
 
-                    val viewAdapter = PersonAdapter(context, persons, selectedPersons)
+                    val viewAdapter = PersonAdapter(context, persons, selectedPersons, billItem.value, splitViewModel)
 
                     recyclerView.adapter = viewAdapter
                 })

@@ -28,6 +28,9 @@ interface BillDao {
         return addBillItem(billItem)
     }
 
+    @Query("DELETE FROM person_bill_item where billItemId = :billItemId and personId = :personId")
+    fun detatchPersonFromBillItem(billItemId: Int, personId: Int)
+
     @Query("INSERT INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
     fun attatchPersonToBillItem(billItemId: Int, personId: Int)
 
@@ -40,12 +43,19 @@ interface BillDao {
         attatchPersonToBillItem(billItem.id, personId.toInt())
     }
 
+    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
+        detatchPersonFromBillItem(billItem.id, person.id)
+    }
+
     @Transaction
     @Query("select * from bills where id = 1")
     fun getBillWithItems(): LiveData<BillWithItems>
 
     @Query("select * from persons p left join person_bill_item pi on pi.personId = p.id where pi.billItemId = :billItemId")
     fun getPersonsForBillItem(billItemId: Int): LiveData<List<Person>>
+
+    @Update
+    fun updatePerson(person: Person)
 
     @Query("select * from persons")
     fun getAllPersons(): LiveData<List<Person>>

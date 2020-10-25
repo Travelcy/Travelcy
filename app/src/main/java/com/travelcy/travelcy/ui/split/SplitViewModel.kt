@@ -76,6 +76,14 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
         return billRepository.addPersonToBillItem(billItem, person)
     }
 
+    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
+        return billRepository.removePersonFromBillItem(billItem, person)
+    }
+
+    fun updatePerson(person: Person) {
+        return billRepository.updatePerson(person)
+    }
+
     fun formatPrice(amount: Double): String {
         return formatPrice(amount, localCurrency.value, foreignCurrency.value)
     }

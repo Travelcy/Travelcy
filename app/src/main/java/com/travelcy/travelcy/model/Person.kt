@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
     onDelete = ForeignKey.CASCADE)
 ])
 class Person (
-    val name: String
+    var name: String
 ) {
     @PrimaryKey(autoGenerate = true)
     var id = 0

@@ -62,4 +62,16 @@ class BillRepository (
             billDao.addPersonToBillItem(billItem, person)
         }
     }
+
+    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
+        executor.execute {
+            billDao.removePersonFromBillItem(billItem, person)
+        }
+    }
+
+    fun updatePerson(person: Person) {
+        executor.execute {
+            billDao.updatePerson(person)
+        }
+    }
 }

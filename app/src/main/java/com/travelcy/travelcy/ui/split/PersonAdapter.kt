@@ -6,12 +6,51 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.travelcy.travelcy.R
+import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.Person
 import kotlinx.android.synthetic.main.person_item.view.*
 
-class PersonViewHolder(private val constraintLayout: RelativeLayout): RecyclerView.ViewHolder(constraintLayout) {
+class PersonViewHolder(private val constraintLayout: RelativeLayout, private val billItem: BillItem?, private val splitViewModel: SplitViewModel): RecyclerView.ViewHolder(constraintLayout) {
+
+    fun setPerson(person: Person, isSelected: Boolean) {
+        setPersonName(person.name)
+        setSelected(isSelected)
+
+        constraintLayout.person_name.doAfterTextChanged {
+            person.name = it.toString()
+            splitViewModel.updatePerson(person)
+        }
+
+        constraintLayout.person_selected.setOnCheckedChangeListener { checkbox, isChecked ->
+            if (billItem != null) {
+                if (isChecked) {
+                    splitViewModel.addPersonToBillItem(billItem, person)
+                }
+                else {
+                    splitViewModel.removePersonFromBillItem(billItem, person)
+                }
+            }
+        }
+    }
+
+    fun setupAddViewHolder(context: Context?) {
+        setHint(context?.getString(R.string.title_person_hint) ?: "")
+        val newPerson = Person("")
+        constraintLayout.person_name.doAfterTextChanged {
+            newPerson.name = it.toString()
+        }
+
+        constraintLayout.person_add_button.setOnClickListener {
+            if (billItem != null) {
+                splitViewModel.addPersonToBillItem(billItem, newPerson)
+            }
+        }
+    }
+
+
     fun setPersonName(name: String) {
         constraintLayout.person_name.setText(name)
     }
@@ -27,7 +66,7 @@ class PersonViewHolder(private val constraintLayout: RelativeLayout): RecyclerVi
     }
 }
 
-class PersonAdapter(private val context: Context?, private val persons: List<Person>, private val selectedPersons: List<Person>) :
+class PersonAdapter(private val context: Context?, private val persons: List<Person>, private val selectedPersons: List<Person>, private val billItem: BillItem?, private val splitViewModel: SplitViewModel) :
     RecyclerView.Adapter<PersonViewHolder>() {
 
     // Create new views (invoked by the layout manager)
@@ -38,26 +77,27 @@ class PersonAdapter(private val context: Context?, private val persons: List<Per
             .inflate(R.layout.person_item, parent, false) as RelativeLayout
         // set the view's size, margins, paddings and layout parameters
 
-        return PersonViewHolder(personLayout)
+        return PersonViewHolder(personLayout, billItem, splitViewModel)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
         Log.d(TAG, position.toString())
         if (position < persons.size) {
-            val person = persons[position]
+            val person  = persons[position]
+
             val isSelected = selectedPersons.find {
                 person.id == it.id
             } != null
-            holder.setPersonName(person.name)
-            holder.setSelected(isSelected)
+
+            holder.setPerson(person, isSelected)
         }
         else {
-            holder.setHint(context?.getString(R.string.title_person_hint) ?: "")
+            holder.setupAddViewHolder(context)
         }
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
+    // We need to add 1 to account for the add user item at the end
     override fun getItemCount() = persons.size + 1
 
     companion object {
