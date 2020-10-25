@@ -26,23 +26,22 @@ import java.util.concurrent.TimeUnit
 
 class CurrencyDaoMock: CurrencyDao {
     private val currencies = arrayOf(
-        Currency("ISK", "Icelandic Króna", 1.0),
-        Currency("CAD", "Canadian dollar", 0.009546683),
-        Currency("DKK", "Danish krona", 0.0457137592),
-        Currency("SEK", "Swedish krona", 0.064004914),
-        Currency("EUR", "Euros", 0.0061425061),
-        Currency("NOK", "Norwegian crona", 0.0667217445),
-        Currency("USD", "US dollar", 0.007245086),
-        Currency("AUD", "Australian dollar", 0.0100767813)
+        Currency("ISK", "Icelandic Króna", 1.0, true, 0),
+        Currency("CAD", "Canadian dollar", 0.009546683, true, 0),
+        Currency("DKK", "Danish krona", 0.0457137592, true, 0),
+        Currency("SEK", "Swedish krona", 0.064004914, true, 0),
+        Currency("EUR", "Euros", 0.0061425061, true, 0),
+        Currency("NOK", "Norwegian crona", 0.0667217445, true, 0),
+        Currency("USD", "US dollar", 0.007245086, true, 0),
+        Currency("AUD", "Australian dollar", 0.0100767813, true, 0)
     ).toList()
 
-    override fun insertAll(currencies: List<Currency>) {
-       // Do nothing, were not testing the dao here
+    override fun getRawCurrency(currencyCode: String): Currency? {
+        return currencies.find {it.id == currencyCode}
     }
 
     override fun getCurrency(currencyCode: String): LiveData<Currency> {
-        val currency = currencies.find {it.id == currencyCode}
-        return MutableLiveData<Currency>(currency)
+        return MutableLiveData<Currency>(getRawCurrency(currencyCode))
     }
 
     override fun hasCurrencies(): Boolean {
@@ -51,6 +50,18 @@ class CurrencyDaoMock: CurrencyDao {
 
     override fun loadCurrencies(): LiveData<List<Currency>> {
         return MutableLiveData<List<Currency>>(currencies)
+    }
+
+    override fun insertCurrency(currency: Currency) {
+        // Do nothing, were not testing the dao here
+    }
+
+    override fun updateCurrency(currency: Currency) {
+        // Do nothing, were not testing the dao here
+    }
+
+    override fun updateCurrencies(currencies: List<Currency>) {
+        // Do nothing, were not testing the dao here
     }
 }
 
@@ -72,10 +83,10 @@ class SettingsDaoMock: SettingsDao {
     private fun createCurrencyFromId(id: String?): Currency? {
         return when (id) {
             "ISK" -> {
-                Currency(id, "Icelandic Króna", 1.0)
+                Currency(id, "Icelandic Króna", 1.0, true, 0)
             }
             "USD" -> {
-                Currency(id, "US dollar", 0.007245086)
+                Currency(id, "US dollar", 0.007245086, true, 0)
             }
             else -> {
                 null
@@ -169,7 +180,7 @@ class CurrencyRepositoryTest {
         val localCurrency = currencyRepository.localCurrency.blockingObserve()
         val foreignCurrency = currencyRepository.foreignCurrency.blockingObserve()
 
-        Assert.assertEquals("ISK", localCurrency?.id)
+        Assert.assertEquals("EUR", localCurrency?.id)
         Assert.assertEquals("USD", foreignCurrency?.id)
     }
 
