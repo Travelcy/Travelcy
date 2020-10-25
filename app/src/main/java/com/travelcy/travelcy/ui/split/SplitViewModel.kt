@@ -1,6 +1,5 @@
 package com.travelcy.travelcy.ui.split
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.travelcy.travelcy.model.BillItem
 import com.travelcy.travelcy.model.BillItemWithPersons
@@ -38,6 +37,41 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
 
         addSource(billItemsWithPersons) {
             recalculateTotal(it, foreignCurrency.value)
+        }
+    }
+
+    val totalAmountPerPerson: MediatorLiveData<List<Pair<Person, String>>> = MediatorLiveData<List<Pair<Person, String>>>().apply {
+        fun recalculateAmountPerPerson(persons: List<Person>?, billItemsWithPersons: List<BillItemWithPersons>?, foreign: Currency?)  {
+            val pricesPerPerson = persons?.map { person ->
+                val priceForPerson = billItemsWithPersons?.sumByDouble { billItemWithPersons ->
+                    val hasPerson = billItemWithPersons.persons.find { it.id == person.id } != null
+                    if (hasPerson) {
+                        billItemWithPersons.billItem.amount * billItemWithPersons.billItem.quantity
+                    } else {
+                        0.0
+                    }
+                } ?: 0.0
+
+                Pair(person, priceForPerson)
+            } ?: emptyList()
+
+            value = pricesPerPerson.filter { (_, price) ->
+                price > 0
+            }.map {(person, price) ->
+                Pair(person, formatPrice(price, localCurrency.value, foreign))
+            }
+        }
+
+        addSource(persons) {
+            recalculateAmountPerPerson(it, billItemsWithPersons.value, foreignCurrency.value)
+        }
+
+        addSource(billItemsWithPersons) {
+            recalculateAmountPerPerson(persons.value, it, foreignCurrency.value)
+        }
+
+        addSource(foreignCurrency) {
+            recalculateAmountPerPerson(persons.value, billItemsWithPersons.value, it)
         }
     }
 

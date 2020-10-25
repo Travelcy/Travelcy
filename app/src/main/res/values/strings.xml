@@ -11,4 +11,5 @@
     <string name="delete">delete</string>
     <string name="title_person_hint">Add person</string>
     <string name="title_persons">People</string>
+    <string name="total_per_person">Total per person</string>
 </resources>

@@ -7,12 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -21,8 +18,9 @@ import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.R
 import com.travelcy.travelcy.model.BillItem
-import com.travelcy.travelcy.ui.convert.ConvertViewModel
-import com.travelcy.travelcy.ui.convert.ConvertViewModelFactory
+import kotlinx.android.synthetic.main.bill_item.view.*
+import kotlinx.android.synthetic.main.fragment_split.view.*
+import kotlinx.android.synthetic.main.labeled_item.view.*
 import java.util.concurrent.Executor
 
 class SplitFragment : Fragment() {
@@ -43,7 +41,8 @@ class SplitFragment : Fragment() {
             SplitViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_split, container, false)
-        val billItemsView: LinearLayout = root.findViewById(R.id.bill_items)
+        val billItemsView: LinearLayout = root.bill_items
+        val totalAmountPerPersonView: LinearLayout = root.bill_total_amount_per_person
 
         splitViewModel.billItemsWithPersons.observe(viewLifecycleOwner, Observer { billItemsWithPerson ->
             billItemsView.removeAllViews()
@@ -52,10 +51,10 @@ class SplitFragment : Fragment() {
                 val billItem = it.billItem
                 val billItemView: RelativeLayout =
                     inflater.inflate(R.layout.bill_item, null) as RelativeLayout
-                billItemView.findViewById<TextView>(R.id.bill_item_persons).text = it.persons.joinToString(separator = " / ") { person -> person.name }
-                billItemView.findViewById<TextView>(R.id.bill_item_description).text =
+                billItemView.bill_item_persons.text = it.persons.joinToString(separator = " / ") { person -> person.name }
+                billItemView.bill_item_description.text =
                     "${billItem.description} × ${billItem.quantity}"
-                billItemView.findViewById<TextView>(R.id.bill_item_amount).text = splitViewModel.formatPrice(billItem.amount)
+                billItemView.bill_item_amount.text = splitViewModel.formatPrice(billItem.amount)
 
                 billItemView.setOnClickListener { showEditBillItemDialog(billItem.id) }
 
@@ -63,10 +62,22 @@ class SplitFragment : Fragment() {
             }
         })
 
-        val totalAmountView: TextView = root.findViewById(R.id.bill_total_amount)
-
         splitViewModel.totalAmount.observe(viewLifecycleOwner, Observer {
-            totalAmountView.text = it
+            root.bill_total_amount.text = it
+        })
+
+        splitViewModel.totalAmountPerPerson.observe(viewLifecycleOwner, Observer {
+            totalAmountPerPersonView.removeAllViews()
+
+            root.total_per_person_title.visibility = if(it.isEmpty()) { View.GONE } else { View.VISIBLE }
+
+            it.forEach { (person, price) ->
+                val labeledView: RelativeLayout =
+                    inflater.inflate(R.layout.labeled_item, null) as RelativeLayout
+                labeledView.labeled_item_label.text = person.name
+                labeledView.labeled_item_value.text = price
+                totalAmountPerPersonView.addView(labeledView)
+            }
         })
 
         val fab: FloatingActionButton = root.findViewById(R.id.floating_action_button)
@@ -85,7 +96,7 @@ class SplitFragment : Fragment() {
         }
     }
 
-    fun showAddBillItemDialog() {
+    private fun showAddBillItemDialog() {
         Log.d(TAG, "showAddBillItemDialog")
         val billItem = BillItem("", 0.0, 1)
 
@@ -96,7 +107,7 @@ class SplitFragment : Fragment() {
         }
     }
 
-    fun showEditBillItemDialog(billItemId: Int) {
+    private fun showEditBillItemDialog(billItemId: Int) {
         Log.d(TAG, "showEditBillItemDialog(billItemId: $id)")
 
         val fragmentManager = activity?.let {

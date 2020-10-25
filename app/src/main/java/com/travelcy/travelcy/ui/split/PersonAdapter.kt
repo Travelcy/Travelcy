@@ -1,7 +1,6 @@
 package com.travelcy.travelcy.ui.split
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,7 +81,6 @@ class PersonAdapter(private val context: Context?, private val persons: List<Per
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
-        Log.d(TAG, position.toString())
         if (position < persons.size) {
             val person  = persons[position]
 
