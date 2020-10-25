@@ -2,65 +2,62 @@ package com.travelcy.travelcy.ui.split
 
 import androidx.lifecycle.*
 import com.travelcy.travelcy.model.BillItem
-import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
+import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.bill.BillRepository
 import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.utils.FormatUtils
 
 class SplitViewModel(private val billRepository: BillRepository, private val currencyRepository: CurrencyRepository) : ViewModel() {
 
-    val billItemsWithPersons = billRepository.billItemsWithPersons
+    val billItemsWithPersons = billRepository.billItems
+    val persons = billRepository.persons
 
     private val foreignCurrency: LiveData<Currency> = currencyRepository.foreignCurrency
     private val localCurrency: LiveData<Currency> = currencyRepository.localCurrency
 
-    val totalAmount: MediatorLiveData<String> = MediatorLiveData<String>().apply {
-        fun recalculateTotal(billItems: List<BillItemWithPersons>?, currency: Currency?) {
-            val localAmount = billItems?.sumByDouble { it.billItem.amount * it.billItem.quantity } ?: 0.0
+    val totalAmount = TotalAmountLiveData(billItemsWithPersons, localCurrency, foreignCurrency)
 
-            value = formatPrice(localAmount, localCurrency.value, currency)
-        }
+    val totalAmountPerPerson = TotalAmountPerPersonLiveData(persons, billItemsWithPersons, localCurrency, foreignCurrency)
 
-        addSource(foreignCurrency) {
-           recalculateTotal(billItemsWithPersons.value, it)
-        }
-
-        addSource(billItemsWithPersons) {
-            recalculateTotal(it, foreignCurrency.value)
-        }
+    fun upsertBillItem(billItem: BillItem): Int {
+        return billRepository.upsertBillItem(billItem)
     }
 
+    fun getOrGenerateBillItem(billItemId: Int?): LiveData<BillItem> {
+        if (billItemId != null) {
+            return billRepository.getBillItem(billItemId)
+        }
 
-    fun addBillItem(billItem: BillItem): Int {
-        return billRepository.addBillItem(billItem)
-    }
-
-    fun updateBillItem(billItem: BillItem) {
-        return billRepository.updateBillItem(billItem)
-    }
-
-    fun getBillItem(billItemId: Int): LiveData<BillItemWithPersons> {
-        return billRepository.getBillItem(billItemId)
+        return MutableLiveData(BillItem("", 0.0, 1))
     }
 
     fun deleteBillItem(billItem: BillItem) {
         return billRepository.deleteBillItem(billItem)
     }
 
+
+    fun getPersonsForBillItem(billItemId: Int?): MediatorLiveData<List<Pair<Person, Boolean>>> {
+        val billPersons = if (billItemId != null) {billRepository.getPersonsForBillItem(billItemId)} else {
+            MutableLiveData(emptyList())}
+
+        return PersonsForBillItemLiveData(persons, billPersons)
+    }
+
+    fun addPersonToBillItem(billItemId: Int, person: Person) {
+        return billRepository.addPersonToBillItem(billItemId, person)
+    }
+
+    fun removePersonFromBillItem(billItemId: Int, person: Person) {
+        return billRepository.removePersonFromBillItem(billItemId, person)
+    }
+
+    fun updatePerson(person: Person) {
+        return billRepository.updatePerson(person)
+    }
+
     fun formatPrice(amount: Double): String {
-        return formatPrice(amount, localCurrency.value, foreignCurrency.value)
+        return FormatUtils.formatPrice(amount, localCurrency.value, foreignCurrency.value)
     }
 
-    private fun formatPrice(amount: Double, local: Currency?, foreign: Currency?): String {
-        var foreignAmount: Double? = null
-        if (foreign != null) {
-            foreignAmount = foreign.exchangeRate * amount
-        }
-
-        val formattedLocalAmount = FormatUtils.formatCurrency(amount, local?.id)
-        val formattedForeignAmount = if (foreignAmount != null) {" / " + FormatUtils.formatCurrency(foreignAmount, foreign?.id)} else {""}
-
-        return "$formattedLocalAmount$formattedForeignAmount"
-    }
 }

@@ -15,7 +15,7 @@ import java.net.HttpURLConnection
 
 class CurrencyWebServiceTest {
     // Mock server to mock the api
-    private var mockWebServer = MockWebServer()
+    private val mockWebServer = MockWebServer()
 
     private lateinit var currencyWebService: CurrencyWebService
 

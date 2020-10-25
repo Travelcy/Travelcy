@@ -15,7 +15,7 @@ interface BillDao {
     fun hasBill(): Boolean
 
     @Query("SELECT * FROM bills where id = 1")
-    fun getBill(): Bill
+    fun getBill(): LiveData<Bill>
 
     @Insert(onConflict = REPLACE)
     fun addBillItem(billItem: BillItem): Long
@@ -23,32 +23,49 @@ interface BillDao {
     @Update
     fun updateBillItem(billItem: BillItem)
 
-    fun addBillItemToBill(billItem: BillItem, bill: Bill): Long {
-        billItem.billId = bill.id
+    fun addBillItemToBill(billItem: BillItem): Long {
+        billItem.billId = 1
         return addBillItem(billItem)
     }
 
-    @Query("INSERT INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
+    @Query("DELETE FROM person_bill_item where billItemId = :billItemId and personId = :personId")
+    fun detatchPersonFromBillItem(billItemId: Int, personId: Int)
+
+    @Query("INSERT OR IGNORE INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
     fun attatchPersonToBillItem(billItemId: Int, personId: Int)
 
     @Insert(onConflict = REPLACE)
-    fun addPerson(person: Person)
+    fun addPerson(person: Person): Long
 
-    fun addPersonToBillItem(billItem: BillItem, person: Person) {
-        person.billId = billItem.billId
-        addPerson(person)
-        attatchPersonToBillItem(billItem.id, person.id)
+    fun addPersonToBillItem(billItemId: Int, person: Person) {
+        person.billId = billItemId
+        var personId = person.id
+        if (personId == null) {
+            personId = addPerson(person).toInt()
+        }
+        attatchPersonToBillItem(billItemId, personId)
     }
 
-    @Transaction
-    @Query("select * from bills where id = 1")
-    fun getBillWithItems(): LiveData<BillWithItems>
+    fun removePersonFromBillItem(billItemId: Int, person: Person) {
+        if (person.id != null) {
+            detatchPersonFromBillItem(billItemId, person.id as Int)
+        }
+    }
 
-    @Query("select * from bill_items")
-    fun getBillItemsWithPerson() : List<BillItemWithPersons>
+    @Query("select * from bill_items where billId = 1")
+    fun getBillItemsWithPersons(): LiveData<List<BillItemWithPersons>>
+
+    @Query("select * from persons p left join person_bill_item pi on pi.personId = p.id where pi.billItemId = :billItemId")
+    fun getPersonsForBillItem(billItemId: Int): LiveData<List<Person>>
+
+    @Update
+    fun updatePerson(person: Person)
+
+    @Query("select * from persons")
+    fun getAllPersons(): LiveData<List<Person>>
 
     @Query("select * from bill_items where id = :billItemId")
-    fun getBillItemWithPersons(billItemId: Int): LiveData<BillItemWithPersons>
+    fun getBillItem(billItemId: Int): LiveData<BillItem>
 
     @Delete
     fun deleteBillItem(billItem: BillItem)

@@ -71,6 +71,9 @@ class TravelcyDatabaseTest {
 
         // Insert currencies to database
         currencyDao.insertAll(currencies.asList())
+
+        // Add bill
+        billDao.updateBill(Bill())
     }
 
     /**
@@ -160,25 +163,23 @@ class TravelcyDatabaseTest {
     fun testBillSaveAndLoad() {
         billDao.updateBill(Bill())
 
-        val retrievedBill = billDao.getBill()
+        val retrievedBill = billDao.getBill().blockingObserve()
 
         Assert.assertNotNull(retrievedBill)
     }
 
     @Test
-    fun testBillWithItemsSaveAndLoad() {
-        val bill = Bill()
-        billDao.updateBill(bill)
-        billDao.addBillItemToBill(BillItem("Test description", 1.0, 1), bill)
-        billDao.addBillItemToBill(BillItem("Test description", 2.0, 1), bill)
+    fun testBillSaveLoad() {
+        billDao.addBillItemToBill(BillItem("Test description", 1.0, 1))
+        billDao.addBillItemToBill(BillItem("Test description", 2.0, 1))
 
-        val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
+        val retrievedBillWithItems = billDao.getBillItemsWithPersons().blockingObserve()
 
         Assert.assertNotNull(retrievedBillWithItems)
 
-        Assert.assertEquals(2, retrievedBillWithItems?.items?.size)
+        Assert.assertEquals(2, retrievedBillWithItems?.size)
 
-        retrievedBillWithItems?.items?.forEachIndexed() {index, billItemWithPersons ->
+        retrievedBillWithItems?.forEachIndexed() {index, billItemWithPersons ->
             Assert.assertEquals("Test description", billItemWithPersons.billItem.description)
             Assert.assertEquals(index.toDouble() + 1, billItemWithPersons.billItem.amount, 0.0)
         }
@@ -186,24 +187,26 @@ class TravelcyDatabaseTest {
 
     @Test
     fun testBillItemWithPerson() {
-        val bill = Bill()
-        billDao.updateBill(bill)
         val billItem = BillItem("Test description", 1.0, 1)
-        billDao.addBillItemToBill(billItem, bill)
+        billItem.id = 1
+        billDao.addBillItemToBill(billItem)
         val person = Person("Test name")
-        billDao.addPersonToBillItem(billItem, person)
+        billDao.addPersonToBillItem(billItem.id as Int, person)
 
-        val retrievedBillWithItems = billDao.getBillWithItems().blockingObserve()
+        val persons = billDao.getAllPersons().blockingObserve()
+        val retrievedBillItemsWithPersons = billDao.getBillItemsWithPersons().blockingObserve()
 
-        Assert.assertNotNull(retrievedBillWithItems)
+        Assert.assertNotNull(retrievedBillItemsWithPersons)
 
-        Assert.assertEquals(1, retrievedBillWithItems?.items?.size)
+        Assert.assertEquals(1, retrievedBillItemsWithPersons?.size)
 
-        retrievedBillWithItems?.persons?.forEach {
+        Assert.assertEquals(1, persons?.size)
+
+        persons?.forEach {
             Assert.assertEquals("Test name", it.name)
         }
 
-        retrievedBillWithItems?.items?.forEachIndexed {index, billItemWithPersons ->
+        retrievedBillItemsWithPersons?.forEachIndexed {index, billItemWithPersons ->
             Assert.assertEquals("Test description", billItemWithPersons.billItem.description)
             Assert.assertEquals(index.toDouble() + 1, billItemWithPersons.billItem.amount, 0.0)
             billItemWithPersons.persons.forEach { Assert.assertEquals("Test name", it.name) }

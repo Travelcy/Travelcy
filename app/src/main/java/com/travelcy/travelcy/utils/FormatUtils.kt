@@ -16,12 +16,26 @@ object FormatUtils {
         return decimalFormat.format(amount)
     }
 
+    fun formatPrice(amount: Double, local: com.travelcy.travelcy.model.Currency?, foreign: com.travelcy.travelcy.model.Currency?): String {
+        var foreignAmount: Double? = null
+        if (foreign != null) {
+            foreignAmount = foreign.exchangeRate * amount
+        }
+
+        val formattedLocalAmount = formatCurrency(amount, local?.id)
+        val formattedForeignAmount = if (foreignAmount != null) {" / " + formatCurrency(foreignAmount, foreign?.id)} else {""}
+
+        return "$formattedLocalAmount$formattedForeignAmount"
+    }
+
     fun formatCurrency(amount: Double, currencyCode: String?): String {
         if (currencyCode == null) return amount.toString()
 
         val format: NumberFormat = NumberFormat.getCurrencyInstance()
-        format.setMaximumFractionDigits(2)
-        format.setCurrency(Currency.getInstance(currencyCode))
+        format.maximumFractionDigits = 2
+        format.minimumFractionDigits = 0
+        format.isGroupingUsed = true
+        format.currency = Currency.getInstance(currencyCode)
 
         return format.format(amount)
     }
