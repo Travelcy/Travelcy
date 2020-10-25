@@ -181,7 +181,7 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!)
+        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!.id)
 
         // This is a hack since the currency repository is executing on a background thread
         executorService.awaitTermination(1, TimeUnit.SECONDS)
@@ -201,7 +201,7 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeForeignCurrency(localCurrencyBefore!!)
+        currencyRepository.changeForeignCurrency(localCurrencyBefore!!.id)
 
         // This is a hack since the currency repository is executing on a background thread
         executorService.awaitTermination(1, TimeUnit.SECONDS)
