@@ -120,11 +120,9 @@ class CurrencyRepository (
                     if (currencyModel != null) {
                         currencyModel.name = currency.displayName
                         currencyModel.exchangeRate = it.value
-                        Log.d(TAG, "Updating currency: ${it.key}")
                         currencyDao.updateCurrency(currencyModel)
                     }
                     else {
-                        Log.d(TAG, "Inserting currency: ${it.key}")
                         currencyDao.insertCurrency(Currency(
                             it.key,
                             currency.displayName,
