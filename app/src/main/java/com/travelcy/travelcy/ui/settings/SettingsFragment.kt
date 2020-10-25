@@ -30,11 +30,7 @@ class SettingsFragment : Fragment() {
         //    Specifying START and END also allows
         //    more organic dragging than just specifying UP and DOWN.
         val simpleItemTouchCallback =
-            object : ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP or
-                        ItemTouchHelper.DOWN or
-                        ItemTouchHelper.START or
-                        ItemTouchHelper.END, 0) {
+            object : ItemTouchHelper.SimpleCallback(UP or DOWN or START or END, 0) {
 
                 override fun onMove(recyclerView: RecyclerView,
                                     viewHolder: RecyclerView.ViewHolder,
@@ -46,9 +42,8 @@ class SettingsFragment : Fragment() {
                     // 2. Update the backing model. Custom implementation in
                     //    MainRecyclerViewAdapter. You need to implement
                     //    reordering of the backing model inside the method.
-                    adapter.moveItem(from, to)
                     // 3. Tell adapter to render the model update.
-                    adapter.notifyItemMoved(from, to)
+                    adapter.moveItem(from, to)
 
                     return true
                 }
@@ -57,6 +52,16 @@ class SettingsFragment : Fragment() {
                     // 4. Code block for horizontal swipe.
                     //    ItemTouchHelper handles horizontal swipe as well, but
                     //    it is not relevant with reordering. Ignoring here.
+                }
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+
+                    val adapter = recyclerView.adapter as SettingsCurrenciesAdapter
+                    adapter.saveSort()
                 }
             }
         ItemTouchHelper(simpleItemTouchCallback)
@@ -84,9 +89,12 @@ class SettingsFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
         settingsViewModel.currencies.observe(viewLifecycleOwner, Observer {
-            val viewAdapter = SettingsCurrenciesAdapter(itemTouchHelper, context, settingsViewModel)
+            val currenciesMutable = it.toMutableList()
+            currenciesMutable.sortBy { el -> el.sort }
+            val viewAdapter = SettingsCurrenciesAdapter(itemTouchHelper, settingsViewModel, currenciesMutable)
 
             recyclerView.adapter = viewAdapter
+
         })
 
         return root

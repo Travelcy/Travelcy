@@ -10,14 +10,29 @@ import androidx.recyclerview.widget.RecyclerView
 import com.travelcy.travelcy.R
 import com.travelcy.travelcy.model.Currency
 import kotlinx.android.synthetic.main.settings_currency_list_item.view.*
+import java.util.*
 
 class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout, private val settingsViewModel: SettingsViewModel): RecyclerView.ViewHolder(constraintLayout) {
     fun setCurrency(currency: Currency) {
-        constraintLayout.settings_currency_list_title.text = currency.id
+        constraintLayout.settings_currency_list_title.text = "${currency.id} (${currency.name})";
+
+        constraintLayout.settings_currency_list_switch.isChecked = currency.enabled
+
+        constraintLayout.settings_currency_list_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            currency.enabled = isChecked
+            if (!isChecked) {
+                currency.sort = Int.MAX_VALUE // Sort disabled to to bottom
+            }
+            settingsViewModel.updateCurrency(currency)
+        }
     }
 }
 
-class SettingsCurrenciesAdapter(private val itemTouchHelper: ItemTouchHelper, private val context: Context?, private val settingsViewModel: SettingsViewModel) :
+class SettingsCurrenciesAdapter(
+    private val itemTouchHelper: ItemTouchHelper,
+    private val settingsViewModel: SettingsViewModel,
+    private val currencies: MutableList<Currency>
+) :
     RecyclerView.Adapter<SettingsCurrenciesViewHolder>() {
 
     // Create new views (invoked by the layout manager)
@@ -42,14 +57,22 @@ class SettingsCurrenciesAdapter(private val itemTouchHelper: ItemTouchHelper, pr
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: SettingsCurrenciesViewHolder, position: Int) {
-        holder.setCurrency(settingsViewModel.currencies.value!![position])
+        holder.setCurrency(currencies[position])
     }
 
-    // We need to add 1 to account for the add user item at the end
     override fun getItemCount() = settingsViewModel.currencies.value!!.size
 
     fun moveItem(from: Int, to: Int) {
-        println("MOVE ITEM from ${from} to ${to}")
+        notifyItemMoved(from, to)
+
+        Collections.swap(currencies, from, to)
+    }
+
+    fun saveSort() {
+        currencies.forEachIndexed { index, currency ->
+            currency.sort = index
+        }
+        settingsViewModel.updateCurrencies(currencies)
     }
 
     companion object {
