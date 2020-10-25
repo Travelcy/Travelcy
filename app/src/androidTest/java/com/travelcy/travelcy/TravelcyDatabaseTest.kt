@@ -70,7 +70,7 @@ class TravelcyDatabaseTest {
         )
 
         // Insert currencies to database
-        currencyDao.insertAll(currencies.asList())
+        currencies.asList().forEach { currencyDao.insertCurrency(it) }
 
         // Add bill
         billDao.updateBill(Bill())

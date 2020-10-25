@@ -36,13 +36,12 @@ class CurrencyDaoMock: CurrencyDao {
         Currency("AUD", "Australian dollar", 0.0100767813)
     ).toList()
 
-    override fun insertAll(currencies: List<Currency>) {
-       // Do nothing, were not testing the dao here
+    override fun getRawCurrency(currencyCode: String): Currency? {
+        return currencies.find {it.id == currencyCode}
     }
 
     override fun getCurrency(currencyCode: String): LiveData<Currency> {
-        val currency = currencies.find {it.id == currencyCode}
-        return MutableLiveData<Currency>(currency)
+        return MutableLiveData<Currency>(getRawCurrency(currencyCode))
     }
 
     override fun hasCurrencies(): Boolean {
@@ -51,6 +50,22 @@ class CurrencyDaoMock: CurrencyDao {
 
     override fun loadCurrencies(): LiveData<List<Currency>> {
         return MutableLiveData<List<Currency>>(currencies)
+    }
+
+    override fun insertCurrency(currency: Currency) {
+        // Do nothing, were not testing the dao here
+    }
+
+    override fun updateCurrency(currency: Currency) {
+        // Do nothing, were not testing the dao here
+    }
+
+    override fun updateCurrencies(currencies: List<Currency>) {
+        // Do nothing, were not testing the dao here
+    }
+
+    override fun deleteOtherCurrencies(currencyCodes: List<String>) {
+        // Do nothing, were not testing the dao here
     }
 }
 
@@ -181,7 +196,7 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!)
+        currencyRepository.changeLocalCurrency(foreignCurrencyBefore!!.id)
 
         // This is a hack since the currency repository is executing on a background thread
         executorService.awaitTermination(1, TimeUnit.SECONDS)
@@ -201,7 +216,7 @@ class CurrencyRepositoryTest {
         Assert.assertEquals("ISK", localCurrencyBefore?.id)
         Assert.assertEquals("USD", foreignCurrencyBefore?.id)
 
-        currencyRepository.changeForeignCurrency(localCurrencyBefore!!)
+        currencyRepository.changeForeignCurrency(localCurrencyBefore!!.id)
 
         // This is a hack since the currency repository is executing on a background thread
         executorService.awaitTermination(1, TimeUnit.SECONDS)

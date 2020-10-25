@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="42dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/settings_currency_list_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:layout_centerVertical="true"
+        />
+    <TextView
+        android:id="@+id/settings_currency_list_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/settings_currency_list_switch"
+        android:textSize="16sp"
+        android:layout_marginStart="20dp"
+        android:textColor="@color/colorMainFont"
+        />
+    <ImageView
+        android:id="@+id/settings_currency_list_handle"
+        android:layout_width="16dp"
+        android:layout_height="14dp"
+        android:src="@drawable/ic_view_headline_24px"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true" />
+</RelativeLayout>

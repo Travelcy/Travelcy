@@ -1,13 +1,17 @@
 package com.travelcy.travelcy.ui.settings
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.travelcy.travelcy.model.Currency
+import com.travelcy.travelcy.services.currency.CurrencyRepository
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(private val currencyRepository: CurrencyRepository) : ViewModel() {
+    val currencies = currencyRepository.currencies
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is the Settings Fragment"
+    fun updateCurrency(currency: Currency) {
+        currencyRepository.updateCurrency(currency)
     }
-    val text: LiveData<String> = _text
+
+    fun updateCurrencies(currencies: List<Currency>) {
+        currencyRepository.updateCurrencies(currencies)
+    }
 }

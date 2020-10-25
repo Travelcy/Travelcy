@@ -18,9 +18,9 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
     private val currencies = currencyRepository.currencies
 
     val currencyIds = Transformations.map(currencies) {
-        it.map { currency ->
-            currency.id
-        }
+        it.sortedBy { currency -> currency.sort }
+            .filter { currency -> currency.enabled }
+            .map { currency -> currency.id }
     }
 
     val fromAmount = MutableLiveData<Double>(1.0)
@@ -40,14 +40,12 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
     }
 
     fun setLocalCurrency(position:Int) {
-        currencyRepository.changeLocalCurrency(currencies.value!![position])
-        Log.d("LOCALCURRENCY", localCurrency.value.toString())
+        currencyRepository.changeLocalCurrency(currencyIds.value!![position])
     }
 
     fun setForeignCurrency(position:Int) {
         toIndex = position
-        currencyRepository.changeForeignCurrency(currencies.value!![position])
-        Log.d("FOREIGNCURRENCY", foreignCurrency.value.toString())
+        currencyRepository.changeForeignCurrency(currencyIds.value!![position])
     }
 
     fun formatAmount(amount: Double): String {
