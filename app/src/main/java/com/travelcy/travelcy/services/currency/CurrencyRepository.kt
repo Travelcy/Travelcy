@@ -2,6 +2,7 @@ package com.travelcy.travelcy.services.currency
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
@@ -16,7 +17,7 @@ class CurrencyRepository (
     private val executor: Executor
 ) {
     val settings: LiveData<Settings> = settingsDao.getSettings()
-    val currencies = currencyDao.loadCurrencies()
+    val currenciesLoaded = MutableLiveData(false)
 
     private val _localCurrencyCode: LiveData<String> = Transformations.map(settings) {
         Log.d(TAG, "Settings changed, local currency code changed to ${it?.localCurrencyCode ?: "undefined"}")
@@ -32,11 +33,21 @@ class CurrencyRepository (
 
     private val foreignCurrencyCode = Transformations.distinctUntilChanged(_foreignCurrencyCode)
 
+    val currencies = Transformations.switchMap<Boolean, List<Currency>>(currenciesLoaded) {currenciesLoaded ->
+        if(currenciesLoaded) {currencyDao.loadCurrencies()} else {MutableLiveData()}
+    }
+
     val localCurrency = CurrencyLiveData(localCurrencyCode, currencies)
 
     val foreignCurrency = CurrencyLiveData(foreignCurrencyCode, currencies)
 
     init {
+        executor.execute {
+            if (currencyDao.hasCurrencies()) {
+                currenciesLoaded.postValue(true)
+            }
+        }
+
         localCurrencyCode.observeForever {
             if (it != null) {
                 updateCurrencies(it)
@@ -138,6 +149,8 @@ class CurrencyRepository (
                 if (currencyCodes != null && currencyCodes.isNotEmpty()) {
                     currencyDao.deleteOtherCurrencies(currencyCodes)
                 }
+
+                currenciesLoaded.postValue(true)
             }
         }
     }
