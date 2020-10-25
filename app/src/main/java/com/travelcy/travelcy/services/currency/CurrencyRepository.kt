@@ -32,14 +32,9 @@ class CurrencyRepository (
 
     private val foreignCurrencyCode = Transformations.distinctUntilChanged(_foreignCurrencyCode)
 
+    val localCurrency = CurrencyLiveData(localCurrencyCode, currencies)
 
-    val localCurrency = Transformations.switchMap(localCurrencyCode) {
-        if (it != null) { currencyDao.getCurrency(it) } else { null }
-    }
-
-    val foreignCurrency = Transformations.switchMap(foreignCurrencyCode) {
-        if (it != null) { currencyDao.getCurrency(it) } else { null }
-    }
+    val foreignCurrency = CurrencyLiveData(foreignCurrencyCode, currencies)
 
     init {
         localCurrencyCode.observeForever {
