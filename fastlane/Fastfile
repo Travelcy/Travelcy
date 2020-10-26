@@ -1,52 +1,61 @@
 platform :android do
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
-  end
+	lane :test do
+		gradle(task: "test")
+	end
 
-  lane :get_version_code do
-      g = google_play_track_version_codes
-      gb = google_play_track_version_codes(track: 'beta')
-      ga = google_play_track_version_codes(track: 'alpha')
-      gi = google_play_track_version_codes(track: 'internal')
-      max_value = [g[0].to_i, gb[0].to_i, ga[0].to_i, gi[0].to_i].max
-      max_value + 1
-    end
+	lane :bump_version_code do
+		g = google_play_track_version_codes
+		gb = google_play_track_version_codes(track: 'beta')
+		ga = google_play_track_version_codes(track: 'alpha')
+		gi = google_play_track_version_codes(track: 'internal')
+		max_value = [g[0].to_i, gb[0].to_i, ga[0].to_i, gi[0].to_i].max
+		version_code = max_value + 1
+		android_set_version_code(
+			version_code: version_code,
+			gradle_file: 'app/build.gradle',
+		)
+	end
 
-  lane :beta do
-    version_code = get_version_code
-    gradle(
-      task: "clean assemble",
-      build_type: "Release",
-      properties: {
-        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE"],
-        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
-        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
-      }
-    )
-    upload_to_play_store(
-      track: 'internal',
-      version_code: version_code
-    )
-  end
+	lane :update_version_name do
+		android_set_version_name(
+			version_name: ENV['VERSION_NAME'],
+			gradle_file: 'app/build.gradle',
+		)
+	end
 
-  lane :production do
-    version_code = get_version_code
-    gradle(
-      task: "clean assemble",
-      build_type: "Release",
-      properties: {
-        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE"],
-        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
-        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
-      }
-    )
-    upload_to_play_store(
-      track: 'production',
-      version_code: version_code,
-      version_name: ENV['VERSION_NAME']
-    )
-  end
+	lane :beta do
+		bump_version_code
+		gradle(
+			task: 'clean assemble',
+			build_type: 'Release',
+			properties: {
+				'android.injected.signing.store.file' => ENV['ANDROID_KEYSTORE'],
+				'android.injected.signing.store.password' => ENV['ANDROID_KEYSTORE_PASSWORD'],
+				'android.injected.signing.key.alias' => ENV['ANDROID_KEY_ALIAS'],
+				'android.injected.signing.key.password' => ENV['ANDROID_KEY_PASSWORD'],
+			}
+		)
+		upload_to_play_store(
+			track: 'internal',
+			version_code: version_code,
+		)
+	end
+
+	lane :production do
+		bump_version_code
+		update_version_name
+		gradle(
+			task: 'clean assemble',
+			build_type: 'Release',
+			properties: {
+				'android.injected.signing.store.file' => ENV['ANDROID_KEYSTORE'],
+				'android.injected.signing.store.password' => ENV['ANDROID_KEYSTORE_PASSWORD'],
+				'android.injected.signing.key.alias' => ENV['ANDROID_KEY_ALIAS'],
+				'android.injected.signing.key.password' => ENV['ANDROID_KEY_PASSWORD'],
+			}
+		)
+		upload_to_play_store(
+			track: 'production',
+		)
+	end
 end
