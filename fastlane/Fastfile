@@ -37,7 +37,6 @@ platform :android do
 		)
 		upload_to_play_store(
 			track: 'internal',
-			version_code: version_code,
 		)
 	end
 
