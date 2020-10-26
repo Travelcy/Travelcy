@@ -4,17 +4,27 @@ platform :android do
     gradle(task: "test")
   end
 
-  lane :get_version_code do
+  lane :bump_version_code do
       g = google_play_track_version_codes
       gb = google_play_track_version_codes(track: 'beta')
       ga = google_play_track_version_codes(track: 'alpha')
       gi = google_play_track_version_codes(track: 'internal')
       max_value = [g[0].to_i, gb[0].to_i, ga[0].to_i, gi[0].to_i].max
-      max_value + 1
+      version_code = max_value + 1
+      android_set_version_code(
+          version_code: version_code,
+          gradle_file: 'app/build.gradle'
+        )
     end
 
+  lane :update_version_name do
+      android_set_version_name(
+          version_name: ENV['VERSION_NAME'],
+          gradle_file: 'app/build.gradle'
+        )
+
   lane :beta do
-    version_code = get_version_code
+    bump_version_code
     gradle(
       task: "clean assemble",
       build_type: "Release",
@@ -32,7 +42,8 @@ platform :android do
   end
 
   lane :production do
-    version_code = get_version_code
+    bump_version_code
+    update_version_name
     gradle(
       task: "clean assemble",
       build_type: "Release",
@@ -44,9 +55,7 @@ platform :android do
       }
     )
     upload_to_play_store(
-      track: 'production',
-      version_code: version_code,
-      version_name: ENV['VERSION_NAME']
+      track: 'production'
     )
   end
 end
