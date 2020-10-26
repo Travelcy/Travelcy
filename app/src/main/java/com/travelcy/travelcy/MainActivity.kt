@@ -2,8 +2,10 @@ package com.travelcy.travelcy
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.IntentSender
+import android.content.*
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -27,6 +29,17 @@ class MainActivity : AppCompatActivity() {
     lateinit var locationRequest: LocationRequest
     private var requestingLocationUpdates = false
     private var updateOnNextLocationUpdate = false
+    lateinit var connectivityManager: ConnectivityManager
+
+    private val networkChangedReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive intent $intent")
+
+            when(intent?.action) {
+                ConnectivityManager.CONNECTIVITY_ACTION -> handleNetworkChanged()
+            }
+        }
+    }
 
     private val locationCallback = object: LocationCallback() {
         override fun onLocationAvailability(p0: LocationAvailability?) {
@@ -39,6 +52,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun isNetworkConnected(): Boolean {
+        Log.d(TAG, "isNetworkConnected")
+        val capabilities: NetworkCapabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            ?: return false
+
+        if (
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        ) {
+            return true
+        }
+
+        return false
+    }
+
+    fun handleNetworkChanged() {
+        Log.d(TAG, "handleNetworkChanged")
+        val mainApplication = application as MainApplication
+        val networkConnected = isNetworkConnected()
+        Log.d(TAG, "Is network connected? $networkConnected")
+        mainApplication.getCurrencyRepository().setNetworkConnected(isNetworkConnected())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,6 +84,8 @@ class MainActivity : AppCompatActivity() {
 
         val navController = findNavController(R.id.nav_host_fragment)
         navView.setupWithNavController(navController)
+
+        connectivityManager = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -68,12 +108,18 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onResume, restarting location updates")
         super.onResume()
         if (requestingLocationUpdates) startLocationUpdates()
+
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(networkChangedReceiver, intentFilter)
+        handleNetworkChanged()
     }
 
     override fun onPause() {
         Log.d(TAG, "onPause, stopping location updates")
         super.onPause()
         stopLocationUpdates()
+        unregisterReceiver(networkChangedReceiver)
     }
 
     private fun stopLocationUpdates() {

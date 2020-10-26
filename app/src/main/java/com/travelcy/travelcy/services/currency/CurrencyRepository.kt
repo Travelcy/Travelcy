@@ -8,6 +8,7 @@ import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Settings
+import java.lang.Exception
 import java.util.concurrent.Executor
 
 class CurrencyRepository (
@@ -16,6 +17,8 @@ class CurrencyRepository (
     private val settingsDao: SettingsDao,
     private val executor: Executor
 ) {
+    var loadingCurrencies = true
+    val networkConnected = MutableLiveData(false)
     val settings: LiveData<Settings> = settingsDao.getSettings()
     val currenciesLoaded = MutableLiveData(false)
 
@@ -116,42 +119,71 @@ class CurrencyRepository (
 
     private fun updateCurrencies(currencyBase: String) {
         Log.d(TAG,"Update currencies (currencyBase: $currencyBase)")
+
+        if (loadingCurrencies)
+
+        loadingCurrencies = true
+
         // Runs in background thread
         executor.execute {
-            val response = currencyWebService.getCurrencies(currencyBase).execute()
+            try {
+                val response = currencyWebService.getCurrencies(currencyBase).execute()
 
-            if (response.isSuccessful) {
-                val currencyWebServiceResponse = response.body()
+                if (response.isSuccessful) {
+                    val currencyWebServiceResponse = response.body()
 
-                var i = 0
-                currencyWebServiceResponse?.rates?.forEach {
-                    val currency = java.util.Currency.getInstance(it.key)
-                    val currencyModel: Currency? = currencyDao.getRawCurrency(it.key)
+                    var i = 0
+                    currencyWebServiceResponse?.rates?.forEach {
+                        val currency = java.util.Currency.getInstance(it.key)
+                        val currencyModel: Currency? = currencyDao.getRawCurrency(it.key)
 
-                    if (currencyModel != null) {
-                        currencyModel.name = currency.displayName
-                        currencyModel.exchangeRate = it.value
-                        currencyDao.updateCurrency(currencyModel)
+                        if (currencyModel != null) {
+                            currencyModel.name = currency.displayName
+                            currencyModel.exchangeRate = it.value
+                            currencyDao.updateCurrency(currencyModel)
+                        }
+                        else {
+                            currencyDao.insertCurrency(Currency(
+                                it.key,
+                                currency.displayName,
+                                it.value,
+                                true,
+                                i++
+                            ))
+                        }
                     }
-                    else {
-                        currencyDao.insertCurrency(Currency(
-                            it.key,
-                            currency.displayName,
-                            it.value,
-                            true,
-                            i++
-                        ))
+
+                    val currencyCodes = currencyWebServiceResponse?.rates?.map { it.key }
+
+                    if (currencyCodes != null && currencyCodes.isNotEmpty()) {
+                        currencyDao.deleteOtherCurrencies(currencyCodes)
                     }
+
+                    currenciesLoaded.postValue(true)
                 }
-
-                val currencyCodes = currencyWebServiceResponse?.rates?.map { it.key }
-
-                if (currencyCodes != null && currencyCodes.isNotEmpty()) {
-                    currencyDao.deleteOtherCurrencies(currencyCodes)
-                }
-
-                currenciesLoaded.postValue(true)
             }
+            catch (exception: Exception) {
+                Log.e(TAG, "Failed to fetch currencies", exception)
+            }
+
+            loadingCurrencies = false
+        }
+    }
+
+    fun setNetworkConnected(isConnected: Boolean) {
+        Log.d(TAG, "setNetworkConected(isConnected: $isConnected)")
+        networkConnected.postValue(isConnected)
+
+        if (isConnected && currenciesLoaded.value != true && !loadingCurrencies && localCurrencyCode.value != null) {
+            Log.d(TAG, "updating currencies after network change")
+            updateCurrencies(localCurrencyCode.value as String)
+        }
+        else {
+            Log.d(TAG, "Not updateint after network change")
+
+            Log.d(TAG, "CurrenciesLoaded ${currenciesLoaded.value}")
+            Log.d(TAG, "Loading currencies $loadingCurrencies")
+            Log.d(TAG, "Local currency code ${localCurrencyCode.value}")
         }
     }
 

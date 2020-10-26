@@ -21,7 +21,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.MainApplication
-import com.travelcy.travelcy.databinding.FragmentConvertBindingImpl
+import com.travelcy.travelcy.databinding.FragmentConvertBinding
 import com.travelcy.travelcy.utils.FormatUtils
 
 class ConvertFragment : Fragment() {
@@ -29,7 +29,7 @@ class ConvertFragment : Fragment() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var convertViewModel: ConvertViewModel
 
-    private lateinit var binding: FragmentConvertBindingImpl
+    private lateinit var binding: FragmentConvertBinding
 
     private lateinit var foreignCurrenciesAdapter: ArrayAdapter<String>
     private lateinit var localCurrenciesAdapter: ArrayAdapter<String>
@@ -52,10 +52,10 @@ class ConvertFragment : Fragment() {
             false
         )
 
-        foreignCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
-        root.from_spinner.adapter = foreignCurrenciesAdapter
-
         localCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
+        root.from_spinner.adapter = localCurrenciesAdapter
+
+        foreignCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
         root.to_spinner.adapter = foreignCurrenciesAdapter
 
         root.from_amount.setText(FormatUtils.formatDecimal(convertViewModel.fromAmount.value ?: 1.0))
@@ -81,18 +81,22 @@ class ConvertFragment : Fragment() {
             root.to_amount.setText(convertViewModel.formatAmount(it))
         })
 
-        convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
+        convertViewModel.localCurrencyIds.observe(viewLifecycleOwner, Observer {
             localCurrenciesAdapter.clear()
             localCurrenciesAdapter.addAll(it)
+            localCurrenciesAdapter.notifyDataSetChanged()
 
             val localCurrencyIndex = convertViewModel.positionOfLocalCurrency()
 
             if (localCurrencyIndex >= 0) {
                 root.from_spinner.setSelection(localCurrencyIndex)
             }
+        })
 
+        convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
             foreignCurrenciesAdapter.clear()
             foreignCurrenciesAdapter.addAll(it)
+            foreignCurrenciesAdapter.notifyDataSetChanged()
 
             val foreignCurrencyindex = convertViewModel.positionOfForeignCurrency()
             if (foreignCurrencyindex >= 0) {
@@ -112,6 +116,10 @@ class ConvertFragment : Fragment() {
             if (index >= 0) {
                 root.to_spinner.setSelection(index)
             }
+        })
+
+        convertViewModel.networkConnected.observe(viewLifecycleOwner, Observer {
+            root.no_network.visibility = if (it) {View.GONE} else {View.VISIBLE}
         })
 
         root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
