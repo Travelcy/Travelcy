@@ -8,6 +8,33 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - run: |
+          echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
+          echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
+          cp android.keystore app/
+      - if: github.event_name == 'release' && github.event.action == 'published'
+        name: Get Release
+        id: release
+        uses: bruceadams/get-release@v1.2.0
+      - name: Build Android
+        env:
+          ANDROID_PACKAGE_NAME: com.travelcy.travelcy
+          ANDROID_KEYSTORE: android.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VERSION_NAME: ${{ steps.release.outputs.tag_name }}
+        uses: maierj/fastlane-action@v1.4.0
+        with:
+          lane: 'android production'
+          skip-tracking: true
   publish-operations-manual:
     runs-on: ubuntu-latest
     name: publish-operation-manual
