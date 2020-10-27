@@ -25,7 +25,7 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
         }
     }
 
-    private fun setupNewPersonView() {
+    private fun setupNewPersonView(initialSetup: Boolean) {
         setHint(context?.getString(R.string.new_person_hint) ?: "")
         constraintLayout.person_selected.visibility = View.GONE
         constraintLayout.person_add_button.visibility = View.VISIBLE
@@ -47,14 +47,18 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
         constraintLayout.person_add_button.setOnClickListener {
             insertNewPerson(newPerson)
         }
+
+        if (!initialSetup) {
+            constraintLayout.person_name.requestFocus()
+        }
     }
 
-    fun setFromIndex(index: Int) {
+    fun setFromIndex(index: Int, initialSetup: Boolean) {
         if (index < persons.size) {
             setPerson(index)
         }
         else {
-            setupNewPersonView()
+            setupNewPersonView(initialSetup)
         }
     }
 
@@ -90,6 +94,7 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
 
 class PersonAdapter(private val context: Context?, private val persons: MutableList<Pair<Person, Boolean>>) :
     RecyclerView.Adapter<PersonViewHolder>() {
+    var initialSetup = true
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
@@ -105,7 +110,11 @@ class PersonAdapter(private val context: Context?, private val persons: MutableL
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
         holder.setIsRecyclable(false)
-        holder.setFromIndex(position)
+        holder.setFromIndex(position, initialSetup)
+
+        if (position == persons.size) {
+            initialSetup = false
+        }
     }
 
 
