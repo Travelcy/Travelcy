@@ -9,6 +9,7 @@ import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.currency.CurrencyLiveData
+import com.travelcy.travelcy.services.currency.LocalCurrencyIdsLiveData
 import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
@@ -133,7 +134,9 @@ class MediatorLiveDataTests {
 
         val currencyCode = MutableLiveData("USD")
 
-        val retrievedCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+        val retrievedCurrencyIdsLiveData = CurrencyLiveData(currencyCode, currencies)
+
+        val retrievedCurrency = retrievedCurrencyIdsLiveData.blockingObserve()
 
         Assert.assertNotNull(retrievedCurrency)
 
@@ -141,16 +144,45 @@ class MediatorLiveDataTests {
 
         currencyCode.postValue("ISK")
 
-        val retrievedSecondCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+        val retrievedSecondCurrency = retrievedCurrencyIdsLiveData.blockingObserve()
 
         Assert.assertEquals("ISK", retrievedSecondCurrency?.id)
 
         currencies.postValue(listOf(currency2, currency3))
 
-        val shouldBeNullCurrency = CurrencyLiveData(currencyCode, currencies).blockingObserve()
+        val shouldBeNullCurrency = retrievedCurrencyIdsLiveData.blockingObserve()
 
 
         Assert.assertNull(shouldBeNullCurrency)
+    }
+
+    @Test
+    fun testLocalCurrencyIdsLiveData() {
+        val isConnected = MutableLiveData(true)
+
+        val currency = Currency("ISK", "Króna", 1.0)
+
+        val currencies = MutableLiveData(listOf("ISK", "USD", "NOK"))
+
+        val localCurrency = MutableLiveData(currency)
+
+        val localCurrencyIdsLiveData = LocalCurrencyIdsLiveData(currencies, localCurrency, isConnected)
+
+        val localCurrencyIds = localCurrencyIdsLiveData.blockingObserve()
+
+        Assert.assertNotNull(localCurrencyIds)
+
+        Assert.assertEquals(3, localCurrencyIds?.size)
+
+        isConnected.postValue(false)
+
+        val onlyLocalCurrency = localCurrencyIdsLiveData.blockingObserve()
+
+        Assert.assertNotNull(onlyLocalCurrency)
+
+        Assert.assertEquals(1, onlyLocalCurrency?.size)
+
+        Assert.assertEquals("ISK", onlyLocalCurrency?.get(0))
     }
 
 

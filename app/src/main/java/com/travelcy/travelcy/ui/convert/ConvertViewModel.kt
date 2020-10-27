@@ -3,9 +3,11 @@ package com.travelcy.travelcy.ui.convert
 import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.travelcy.travelcy.services.currency.CurrencyRepository
+import com.travelcy.travelcy.services.currency.LocalCurrencyIdsLiveData
 import com.travelcy.travelcy.services.location.LocationRepository
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -16,12 +18,15 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
     val localCurrency = currencyRepository.localCurrency
     val foreignCurrency = currencyRepository.foreignCurrency
     private val currencies = currencyRepository.currencies
+    val networkConnected = currencyRepository.networkConnected
 
     val currencyIds = Transformations.map(currencies) {
         it.sortedBy { currency -> currency.sort }
             .filter { currency -> currency.enabled }
             .map { currency -> currency.id }
     }
+
+    val localCurrencyIds = LocalCurrencyIdsLiveData(currencyIds, localCurrency, networkConnected)
 
     val fromAmount = MutableLiveData<Double>(1.0)
 
