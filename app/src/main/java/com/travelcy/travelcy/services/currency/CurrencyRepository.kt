@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.database.dao.CurrencyDao
 import com.travelcy.travelcy.database.dao.SettingsDao
 import com.travelcy.travelcy.model.Currency
@@ -45,6 +46,12 @@ class CurrencyRepository (
     val foreignCurrency = CurrencyLiveData(foreignCurrencyCode, currencies)
 
     init {
+        currenciesLoaded.observeForever {
+            if (it == true) {
+                MainActivity.instance?.onAppLoaded()
+            }
+        }
+
         executor.execute {
             if (currencyDao.hasCurrencies()) {
                 currenciesLoaded.postValue(true)

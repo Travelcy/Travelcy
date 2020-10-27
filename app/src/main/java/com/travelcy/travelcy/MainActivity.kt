@@ -30,6 +30,11 @@ class MainActivity : AppCompatActivity() {
     private var requestingLocationUpdates = false
     private var updateOnNextLocationUpdate = false
     lateinit var connectivityManager: ConnectivityManager
+    var appLoaded = false
+
+    init {
+        instance = this
+    }
 
     private val networkChangedReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -79,11 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        val navController = findNavController(R.id.nav_host_fragment)
-        navView.setupWithNavController(navController)
 
         connectivityManager = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -102,6 +103,19 @@ class MainActivity : AppCompatActivity() {
 
         val application = application as MainApplication
         locationRepository = LocationRepository(this,fusedLocationProviderClient , application.getCurrencyRepository())
+    }
+
+    fun onAppLoaded() {
+        if (!appLoaded) {
+            appLoaded = true
+            setContentView(R.layout.activity_main)
+            val navView: BottomNavigationView = findViewById(R.id.nav_view)
+
+            val navController = findNavController(R.id.nav_host_fragment)
+            navView.setupWithNavController(navController)
+
+            setTheme(R.style.AppTheme)
+        }
     }
 
     override fun onResume() {
@@ -223,6 +237,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        var instance: MainActivity? = null
+        private set
         const val TAG = "MainActivity"
         const val LOCATION_PERMISSION_REQUEST_ID = 1
         const val LOCATION_INTERVAL: Long = 10000
