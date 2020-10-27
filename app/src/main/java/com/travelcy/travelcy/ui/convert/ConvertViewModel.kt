@@ -1,6 +1,5 @@
 package com.travelcy.travelcy.ui.convert
 
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
@@ -23,17 +22,9 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
             .map { currency -> currency.id }
     }
 
-    val fromAmount = MutableLiveData<Double>(1.0)
+    val foreignAmount = MutableLiveData<Double>(1.0)
 
-    val toAmount: MediatorLiveData<Double> = MediatorLiveData<Double>().apply {
-        addSource(foreignCurrency) {
-            value = (it?.exchangeRate ?: 0.0) * (fromAmount.value ?: 0.0)
-        }
-
-        addSource(fromAmount) {
-            value = it * (foreignCurrency.value?.exchangeRate ?: 0.0)
-        }
-    }
+    val localAmount = LocalAmountLiveData(foreignAmount, foreignCurrency)
 
     fun switch(){
         currencyRepository.switchCurrencies()
@@ -54,9 +45,9 @@ class ConvertViewModel(private val currencyRepository: CurrencyRepository, priva
         return decimalFormat.format(amount)
     }
 
-    fun updateFromAmount(amount: String) {
-        if (formatAmount(fromAmount.value ?: 0.0) != amount) {
-            fromAmount.value = amount.toDouble()
+    fun updateForeignAmount(amount: String) {
+        if (formatAmount(foreignAmount.value ?: 0.0) != amount) {
+            foreignAmount.value = amount.toDouble()
         }
     }
 

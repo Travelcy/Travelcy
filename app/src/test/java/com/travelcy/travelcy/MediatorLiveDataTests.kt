@@ -9,6 +9,7 @@ import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.currency.CurrencyLiveData
+import com.travelcy.travelcy.ui.convert.LocalAmountLiveData
 import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
@@ -153,6 +154,31 @@ class MediatorLiveDataTests {
 
 
         Assert.assertNull(shouldBeNullCurrency)
+    }
+
+    @Test
+    fun testLocalAmountLiveData() {
+        val foreignCurrency = MutableLiveData(Currency("USD", "Dollar", 0.01))
+
+        val foreignAmount = MutableLiveData(1.0)
+
+        val localAmountLiveData = LocalAmountLiveData(foreignAmount, foreignCurrency)
+
+        val localAmount1 = localAmountLiveData.blockingObserve()
+
+        Assert.assertEquals(100.0, localAmount1)
+
+        foreignAmount.postValue(2.0)
+
+        val localAmount2 = localAmountLiveData.blockingObserve()
+
+        Assert.assertEquals(200.0, localAmount2)
+
+        foreignCurrency.postValue(Currency("CAD", "Kanadian dollar", 0.02))
+
+        val localAmount3 = localAmountLiveData.blockingObserve()
+
+        Assert.assertEquals(100.0, localAmount3)
     }
 
 
