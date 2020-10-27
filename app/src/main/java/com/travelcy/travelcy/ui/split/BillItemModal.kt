@@ -15,9 +15,8 @@ import com.travelcy.travelcy.utils.FormatUtils
 import kotlinx.android.synthetic.main.bill_item_modal.view.*
 import androidx.recyclerview.widget.RecyclerView
 import com.travelcy.travelcy.model.Person
-import java.util.concurrent.Executor
 
-class BillItemModal(private val billItemId: Int?, private val splitViewModel: SplitViewModel, private val executor: Executor) : DialogFragment() {
+class BillItemModal(private val billItemId: Int?, private val splitViewModel: SplitViewModel) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val billItem = splitViewModel.getOrGenerateBillItem(billItemId)
@@ -84,14 +83,7 @@ class BillItemModal(private val billItemId: Int?, private val splitViewModel: Sp
                 .setPositiveButton(R.string.save,
                     DialogInterface.OnClickListener { dialog, id ->
                         if (changedBillItem != null) {
-                            executor.execute {
-                                val billItemId = splitViewModel.upsertBillItem(changedBillItem as BillItem)
-
-                                changedSelectedPersons.forEach {(person, isSelected) ->
-                                    if (isSelected) splitViewModel.addPersonToBillItem(billItemId, person)
-                                    else splitViewModel.removePersonFromBillItem(billItemId, person)
-                                }
-                            }
+                            splitViewModel.saveBillItemWithPersons(changedBillItem, changedSelectedPersons)
                         }
                     })
                 .setNeutralButton(R.string.delete,
