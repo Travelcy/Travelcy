@@ -124,8 +124,8 @@ class CurrencyRepository (
         }
     }
 
-    private fun updateCurrencies(currencyBase: String) {
-        Log.d(TAG,"Update currencies (currencyBase: $currencyBase)")
+    private fun updateCurrencies(baseCurrencyCode: String) {
+        Log.d(TAG,"Update currencies (currencyBase: $baseCurrencyCode)")
 
         if (loadingCurrencies)
 
@@ -134,19 +134,40 @@ class CurrencyRepository (
         // Runs in background thread
         executor.execute {
             try {
-                val response = currencyWebService.getCurrencies(currencyBase).execute()
+                val response = currencyWebService.getCurrencies(baseCurrencyCode).execute()
 
                 if (response.isSuccessful) {
                     val currencyWebServiceResponse = response.body()
 
-                    var i = 0
-                    currencyWebServiceResponse?.rates?.forEach {
+                    val baseCurrency = java.util.Currency.getInstance(baseCurrencyCode)
+                    val baseCurrencyModel: Currency? = currencyDao.getRawCurrency(baseCurrencyCode)
+
+                    if (baseCurrencyModel != null) {
+                        baseCurrencyModel.name = baseCurrency.displayName
+                        baseCurrencyModel.exchangeRate = 1.0
+                        baseCurrencyModel.enabled = true
+                        baseCurrencyModel.sort = 0
+                        currencyDao.updateCurrency(baseCurrencyModel)
+                    }
+                    else {
+                        currencyDao.insertCurrency(Currency(
+                            baseCurrencyCode,
+                            baseCurrency.displayName,
+                            1.0,
+                            true,
+                            1
+                        ))
+                    }
+
+                    var i = 1
+                    currencyWebServiceResponse?.rates?.filter { it.key != baseCurrencyCode }?.forEach {
                         val currency = java.util.Currency.getInstance(it.key)
                         val currencyModel: Currency? = currencyDao.getRawCurrency(it.key)
 
                         if (currencyModel != null) {
                             currencyModel.name = currency.displayName
                             currencyModel.exchangeRate = it.value
+                            currencyModel.sort += 1
                             currencyDao.updateCurrency(currencyModel)
                         }
                         else {
@@ -160,7 +181,8 @@ class CurrencyRepository (
                         }
                     }
 
-                    val currencyCodes = currencyWebServiceResponse?.rates?.map { it.key }
+                    val currencyCodes = currencyWebServiceResponse?.rates?.map { it.key }?.toMutableList()
+                    currencyCodes?.add(baseCurrencyCode)
 
                     if (currencyCodes != null && currencyCodes.isNotEmpty()) {
                         currencyDao.deleteOtherCurrencies(currencyCodes)
