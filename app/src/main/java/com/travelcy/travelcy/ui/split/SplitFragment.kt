@@ -20,12 +20,10 @@ import com.travelcy.travelcy.R
 import kotlinx.android.synthetic.main.bill_item.view.*
 import kotlinx.android.synthetic.main.fragment_split.view.*
 import kotlinx.android.synthetic.main.labeled_item.view.*
-import java.util.concurrent.Executor
 
 class SplitFragment : Fragment() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var splitViewModel: SplitViewModel
-    private lateinit var executor: Executor
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -35,7 +33,6 @@ class SplitFragment : Fragment() {
         firebaseAnalytics = Firebase.analytics
 
         val mainApplication: MainApplication = requireActivity().application as MainApplication
-        executor = mainApplication.getExecutor()
         splitViewModel = ViewModelProvider(this, SplitViewModelFactory(mainApplication.getBillRepository(), mainApplication.getCurrencyRepository())).get(
             SplitViewModel::class.java)
 
@@ -100,7 +97,7 @@ class SplitFragment : Fragment() {
 
         val fragmentManager = activity?.let {
 
-            val newFragment = BillItemModal(billItemId, splitViewModel, executor)
+            val newFragment = BillItemModal(billItemId, splitViewModel)
 
             newFragment.show(it.supportFragmentManager, "billItemDialog")
         }

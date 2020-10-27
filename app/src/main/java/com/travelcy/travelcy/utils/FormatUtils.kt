@@ -1,11 +1,12 @@
 package com.travelcy.travelcy.utils
 
 import android.text.Editable
+import com.travelcy.travelcy.model.Currency
 import java.lang.Exception
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
-import java.util.*
+import java.util.Currency as JavaCurrency
 
 object FormatUtils {
     private const val DECIMAL_FORMAT: String = "#.##"
@@ -16,16 +17,16 @@ object FormatUtils {
         return decimalFormat.format(amount)
     }
 
-    fun formatPrice(amount: Double, local: com.travelcy.travelcy.model.Currency?, foreign: com.travelcy.travelcy.model.Currency?): String {
-        var foreignAmount: Double? = null
+    fun formatPrice(foreignAmount: Double, local: Currency?, foreign: Currency?): String {
+        var localAmount: Double? = null
         if (foreign != null) {
-            foreignAmount = foreign.exchangeRate * amount
+            localAmount = foreignAmount / foreign.exchangeRate
         }
 
-        val formattedLocalAmount = formatCurrency(amount, local?.id)
-        val formattedForeignAmount = if (foreignAmount != null) {" / " + formatCurrency(foreignAmount, foreign?.id)} else {""}
+        val formattedForeignAmount = formatCurrency(foreignAmount, foreign?.id)
+        val formattedLocalAmount = if (localAmount != null) {" / " + formatCurrency(localAmount, local?.id)} else {""}
 
-        return "$formattedLocalAmount$formattedForeignAmount"
+        return "$formattedForeignAmount$formattedLocalAmount"
     }
 
     fun formatCurrency(amount: Double, currencyCode: String?): String {
@@ -35,7 +36,7 @@ object FormatUtils {
         format.maximumFractionDigits = 2
         format.minimumFractionDigits = 0
         format.isGroupingUsed = true
-        format.currency = Currency.getInstance(currencyCode)
+        format.currency = JavaCurrency.getInstance(currencyCode)
 
         return format.format(amount)
     }
