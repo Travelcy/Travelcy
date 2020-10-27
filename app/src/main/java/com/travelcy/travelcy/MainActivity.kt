@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     private var requestingLocationUpdates = false
     private var updateOnNextLocationUpdate = false
     lateinit var connectivityManager: ConnectivityManager
-    var appLoaded = false
+    private lateinit var mainApplication: MainApplication
 
     init {
         instance = this
@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity() {
 
     fun handleNetworkChanged() {
         Log.d(TAG, "handleNetworkChanged")
-        val mainApplication = application as MainApplication
         val networkConnected = isNetworkConnected()
         Log.d(TAG, "Is network connected? $networkConnected")
         mainApplication.getCurrencyRepository().setNetworkConnected(isNetworkConnected())
@@ -85,6 +84,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mainApplication = application as MainApplication
+
+        Log.e("DEBUG", mainApplication.appLoaded.toString())
+
+        if (mainApplication.appLoaded) {
+            setupView()
+        }
 
         connectivityManager = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -106,16 +112,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onAppLoaded() {
-        if (!appLoaded) {
-            appLoaded = true
-            setContentView(R.layout.activity_main)
-            val navView: BottomNavigationView = findViewById(R.id.nav_view)
-
-            val navController = findNavController(R.id.nav_host_fragment)
-            navView.setupWithNavController(navController)
-
-            setTheme(R.style.AppTheme)
+        if (!mainApplication.appLoaded) {
+            mainApplication.appLoaded = true
+            setupView()
         }
+    }
+
+    fun setupView() {
+        setContentView(R.layout.activity_main)
+        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        navView.setupWithNavController(navController)
+
+        setTheme(R.style.AppTheme)
     }
 
     override fun onResume() {
