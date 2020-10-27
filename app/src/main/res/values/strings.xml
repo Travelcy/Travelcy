@@ -13,4 +13,7 @@
     <string name="new_person_hint">Add person</string>
     <string name="title_persons">People</string>
     <string name="total_per_person">Total per person</string>
+    <string name="settings_budget_title">Budget</string>
+    <string name="settings_budget_amount">Amount</string>
+    <string name="settings_currency_list_title">Currencies</string>
 </resources>
