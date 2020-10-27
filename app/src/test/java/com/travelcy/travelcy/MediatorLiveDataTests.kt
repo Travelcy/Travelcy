@@ -36,15 +36,15 @@ class MediatorLiveDataTests {
         val localCurrency = MutableLiveData(Currency("ISK", "Króna", 1.0))
         val foreignCurrency = MutableLiveData(Currency("USD", "Dollar", 0.01))
 
-        val billItem1 = BillItem("Pizza", 1000.0, 2)
+        val billItem1 = BillItem("Pizza", 10.0, 2)
 
-        val billItem2 = BillItem("Beer", 500.0, 4)
+        val billItem2 = BillItem("Beer", 5.0, 4)
 
         val billItemWithPersons = MutableLiveData(listOf(BillItemWithPersons(billItem1, emptyList()), BillItemWithPersons(billItem2, emptyList())))
 
         val totalAmountLiveData = TotalAmountLiveData(billItemWithPersons, localCurrency, foreignCurrency).blockingObserve()
 
-        Assert.assertEquals("ISK4,000 / $40", totalAmountLiveData)
+        Assert.assertEquals("$40 / ISK4,000", totalAmountLiveData)
     }
 
     @Test
@@ -52,11 +52,11 @@ class MediatorLiveDataTests {
         val localCurrency = MutableLiveData(Currency("ISK", "Króna", 1.0))
         val foreignCurrency = MutableLiveData(Currency("USD", "Dollar", 0.01))
 
-        val sharedItem = BillItem("Pizza", 1000.0, 4)
+        val sharedItem = BillItem("Pizza", 10.0, 4)
 
-        val singleItemPerson1 = BillItem("Beer", 500.0, 2)
+        val singleItemPerson1 = BillItem("Beer", 5.0, 2)
 
-        val singleItemPerson2 = BillItem("Juice", 500.0, 1)
+        val singleItemPerson2 = BillItem("Juice", 5.0, 1)
 
         val person1 = Person("Test person 1")
         person1.id = 1
@@ -83,10 +83,10 @@ class MediatorLiveDataTests {
         totalAmountPerPersonLiveData?.forEachIndexed { index, (person, price) ->
             if (index == 0) {
                 Assert.assertEquals("Test person 1", person.name)
-                Assert.assertEquals("ISK3,000 / $30", price)
+                Assert.assertEquals("$30 / ISK3,000", price)
             } else if (index == 1) {
                 Assert.assertEquals("Test person 2", person.name)
-                Assert.assertEquals("ISK2,500 / $25", price)
+                Assert.assertEquals("$25 / ISK2,500", price)
             }
         }
     }
