@@ -188,7 +188,9 @@ class TravelcyDatabaseTest {
         billItem.id = 1
         billDao.addBillItemToBill(billItem)
         val person = Person("Test name")
-        billDao.addPersonToBillItem(billItem.id as Int, person)
+        val addedPersonId = billDao.addPerson(person).toInt()
+        person.id = addedPersonId
+        billDao.addPersonToBillItem(billItem, person)
 
         val persons = billDao.getAllPersons().blockingObserve()
         val retrievedBillItemsWithPersons = billDao.getBillItemsWithPersons().blockingObserve()
