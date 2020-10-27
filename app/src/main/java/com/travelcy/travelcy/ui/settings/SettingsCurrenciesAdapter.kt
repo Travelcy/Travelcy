@@ -1,6 +1,5 @@
 package com.travelcy.travelcy.ui.settings
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -13,15 +12,30 @@ import kotlinx.android.synthetic.main.settings_currency_list_item.view.*
 import java.util.*
 
 class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout, private val settingsViewModel: SettingsViewModel): RecyclerView.ViewHolder(constraintLayout) {
+    var size = 0
+    var _currency: Currency? = null
+
     fun setCurrency(currency: Currency) {
-        constraintLayout.settings_currency_list_title.text = "${currency.id} (${currency.name})";
+        _currency = currency
 
-        constraintLayout.settings_currency_list_switch.isChecked = currency.enabled
+        itemView.settings_currency_list_title.text = "${currency.id} (${currency.name})";
 
-        constraintLayout.settings_currency_list_switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (currency.enabled != isChecked) {
-                currency.enabled = isChecked
-                settingsViewModel.updateCurrency(currency)
+        itemView.settings_currency_list_switch.isChecked = currency.enabled
+    }
+
+    fun setEnabled(enabled: Boolean) {
+        if (_currency != null) {
+            if (_currency!!.enabled != enabled) {
+                _currency!!.enabled = enabled
+
+                if (!enabled) {
+                    _currency?.sort = size
+                }
+                else {
+                    _currency?.sort = 1
+                }
+
+                settingsViewModel.updateCurrency(_currency!!)
             }
         }
     }
@@ -53,15 +67,20 @@ class SettingsCurrenciesAdapter(
             return@setOnTouchListener true
         }
 
+        viewHolder.itemView.settings_currency_list_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            viewHolder.setEnabled(isChecked)
+        }
+
         return viewHolder
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: SettingsCurrenciesViewHolder, position: Int) {
+        holder.size = currencies.size
         holder.setCurrency(currencies[position])
     }
 
-    override fun getItemCount() = settingsViewModel.currencies.value!!.size
+    override fun getItemCount() = currencies.size
 
     fun moveItem(from: Int, to: Int) {
         notifyItemMoved(from, to)
