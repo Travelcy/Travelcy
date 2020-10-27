@@ -6,6 +6,9 @@ Travelcy is a native android application developed in Kotlin with Android Studio
 ## Coding conventions
 We have been following Kotlins' standard coding convention, which can be found here https://kotlinlang.org/docs/reference/coding-conventions.html
 
+## Testing
+TODO: 
+
 ## Setting up the development environment
 1. Download and install Android Studio https://developer.android.com/studio/
 2. Set up git on your machine if you haven't already and clone the repository from here https://github.com/Travelcy/Travelcy
