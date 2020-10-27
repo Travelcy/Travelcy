@@ -34,6 +34,9 @@ interface BillDao {
     @Query("INSERT OR IGNORE INTO person_bill_item (billItemId, personId) VALUES (:billItemId, :personId)")
     fun attatchPersonToBillItem(billItemId: Int, personId: Int)
 
+    @Query("SELECT COUNT(*) FROM persons")
+    fun hasPersons(): Boolean
+
     @Insert(onConflict = REPLACE)
     fun addPerson(person: Person): Long
 
@@ -60,6 +63,9 @@ interface BillDao {
 
     @Update
     fun updatePerson(person: Person)
+
+    @Query("select * from persons where isDefault = 1")
+    fun getDefaultPerson(): LiveData<Person>
 
     @Query("select * from persons")
     fun getAllPersons(): LiveData<List<Person>>

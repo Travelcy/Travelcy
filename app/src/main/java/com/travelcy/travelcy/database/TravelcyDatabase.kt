@@ -64,6 +64,15 @@ abstract class TravelcyDatabase : RoomDatabase() {
                             Log.d(TAG, "No bill in database, setting up bill")
                             billDao.createBill(Bill())
                         }
+
+                        if (!billDao.hasPersons()) {
+                            Log.d(TAG, "No persons in database, adding default person")
+
+                            val defaultPerson = Person("Me")
+                            defaultPerson.isDefault = true
+
+                            billDao.addPerson(defaultPerson)
+                        }
                     }
                 }
             }

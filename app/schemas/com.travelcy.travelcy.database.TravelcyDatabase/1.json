@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0b7be824cba92b512c396da7bb15cefc",
+    "identityHash": "7ccce4544ed8b3472c7580b8a0bb323e",
     "entities": [
       {
         "tableName": "currency",
@@ -175,7 +175,7 @@
       },
       {
         "tableName": "persons",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `billId` INTEGER NOT NULL, `name` TEXT NOT NULL, FOREIGN KEY(`billId`) REFERENCES `bills`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `billId` INTEGER NOT NULL, `budget` REAL NOT NULL, `isDefault` INTEGER NOT NULL, `name` TEXT NOT NULL, FOREIGN KEY(`billId`) REFERENCES `bills`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -186,6 +186,18 @@
           {
             "fieldPath": "billId",
             "columnName": "billId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "budget",
+            "columnName": "budget",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDefault",
+            "columnName": "isDefault",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -248,7 +260,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b7be824cba92b512c396da7bb15cefc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ccce4544ed8b3472c7580b8a0bb323e')"
     ]
   }
 }

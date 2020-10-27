@@ -16,4 +16,6 @@ class Person (
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null
     var billId: Int = 1
+    var budget: Double = 0.0
+    var isDefault: Boolean = false
 }
