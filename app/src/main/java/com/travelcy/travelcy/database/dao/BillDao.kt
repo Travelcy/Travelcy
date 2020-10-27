@@ -38,7 +38,7 @@ interface BillDao {
     fun addPerson(person: Person): Long
 
     fun addPersonToBillItem(billItemId: Int, person: Person) {
-        person.billId = billItemId
+        person.billId = 1
         var personId = person.id
         if (personId == null) {
             personId = addPerson(person).toInt()
