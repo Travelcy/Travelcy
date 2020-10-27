@@ -53,6 +53,7 @@
                     android:popupBackground="@color/colorBackground" />
 
                 <ImageView
+                    android:id="@+id/from_spinner_dropdown_icon"
                     android:layout_width="21dp"
                     android:layout_height="13dp"
                     android:layout_alignParentEnd="true"

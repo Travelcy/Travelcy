@@ -81,7 +81,7 @@ class ConvertFragment : Fragment() {
             root.to_amount.setText(convertViewModel.formatAmount(it))
         })
 
-        convertViewModel.localCurrencyIds.observe(viewLifecycleOwner, Observer {
+        convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
             localCurrenciesAdapter.clear()
             localCurrenciesAdapter.addAll(it)
             localCurrenciesAdapter.notifyDataSetChanged()
@@ -91,9 +91,7 @@ class ConvertFragment : Fragment() {
             if (localCurrencyIndex >= 0) {
                 root.from_spinner.setSelection(localCurrencyIndex)
             }
-        })
 
-        convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
             foreignCurrenciesAdapter.clear()
             foreignCurrenciesAdapter.addAll(it)
             foreignCurrenciesAdapter.notifyDataSetChanged()
@@ -120,6 +118,8 @@ class ConvertFragment : Fragment() {
 
         convertViewModel.networkConnected.observe(viewLifecycleOwner, Observer {
             root.no_network.visibility = if (it) {View.GONE} else {View.VISIBLE}
+            root.from_spinner_dropdown_icon.visibility = if (it) {View.VISIBLE} else {View.GONE}
+            root.from_spinner.isEnabled = it
         })
 
         root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
