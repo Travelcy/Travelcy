@@ -10,124 +10,133 @@
             type="com.travelcy.travelcy.ui.convert.ConvertViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:clipToPadding="false"
+        android:scrollbars="none"
         android:padding="32dp"
         android:layout_marginBottom="30dp"
-        tools:context=".ui.convert.ConvertFragment">
+        android:overScrollMode="ifContentScrolls">
 
-        <RelativeLayout
-            android:id="@+id/from_spinner_container"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/from_amount"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginBottom="18dp">
-            <Button
-                android:id="@+id/no_network"
-                android:layout_width="30dp"
-                android:visibility="gone"
-                android:layout_height="30dp"
-                android:background="@drawable/wifi_off"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="24dp"
-                />
-            <Spinner
-                android:id="@+id/from_spinner"
+            tools:context=".ui.convert.ConvertFragment">
+
+            <RelativeLayout
+                android:id="@+id/from_spinner_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toTopOf="@+id/from_amount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <Button
+                    android:id="@+id/no_network"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="24dp"
+                    android:background="@drawable/wifi_off"
+                    android:visibility="gone" />
+
+                <Spinner
+                    android:id="@+id/from_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/convert_item_height"
+                    android:background="@color/colorElevation"
+                    android:popupBackground="@color/colorBackground" />
+
+                <ImageView
+                    android:id="@+id/from_spinner_dropdown_icon"
+                    android:layout_width="21dp"
+                    android:layout_height="13dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="54dp"
+                    android:background="@drawable/ic_expand_more_24px" />
+            </RelativeLayout>
+
+            <EditText
+                android:id="@+id/from_amount"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/convert_item_height"
-                android:background="@color/colorElevation"
-                android:popupBackground="@color/colorBackground"
-                />
-            <ImageView
-                android:layout_width="21dp"
-                android:layout_height="13dp"
-                android:background="@drawable/ic_expand_more_24px"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="54dp"
-                />
-        </RelativeLayout>
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/edit_text_style"
+                android:inputType="number"
+                android:textAlignment="center"
+                android:textColor="@color/colorMainFont"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toTopOf="@+id/switch_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/from_spinner_container" />
 
-        <EditText
-            android:id="@+id/from_amount"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/convert_item_height"
-            android:background="@drawable/edit_text_style"
-            android:inputType="number"
-            android:textColor="@color/colorMainFont"
-            android:textSize="32sp"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toTopOf="@+id/switch_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/from_spinner_container"
-            android:layout_marginBottom="40dp" />
-
-        <Button
-            android:id="@+id/switch_button"
-            android:layout_width="41dp"
-            android:layout_height="48dp"
-            android:background="@drawable/ic_resource_switch"
-            app:layout_constraintBottom_toTopOf="@+id/to_spinner_container"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/from_amount"
-            android:layout_marginBottom="40dp" />
-
-        <RelativeLayout
-            android:id="@+id/to_spinner_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/to_amount"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/switch_button"
-            android:layout_marginBottom="18dp">
             <Button
-                android:id="@+id/geo_location_button"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/location"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="24dp"
-                />
-            <Spinner
-                android:id="@+id/to_spinner"
+                android:id="@+id/switch_button"
+                android:layout_width="41dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/ic_resource_switch"
+                app:layout_constraintBottom_toTopOf="@+id/to_spinner_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/from_amount" />
+
+            <RelativeLayout
+                android:id="@+id/to_spinner_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toTopOf="@+id/to_amount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/switch_button">
+
+                <Button
+                    android:id="@+id/geo_location_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="24dp"
+                    android:background="@drawable/location" />
+
+                <Spinner
+                    android:id="@+id/to_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/convert_item_height"
+                    android:background="@color/colorElevation"
+                    android:popupBackground="@color/colorBackground" />
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="13dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="54dp"
+                    android:background="@drawable/ic_expand_more_24px" />
+            </RelativeLayout>
+
+            <EditText
+                android:id="@+id/to_amount"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/convert_item_height"
-                android:background="@color/colorElevation"
-                android:popupBackground="@color/colorBackground"
-                 />
-            <ImageView
-                android:layout_width="21dp"
-                android:layout_height="13dp"
-                android:background="@drawable/ic_expand_more_24px"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="54dp"
-                />
-        </RelativeLayout>
+                android:background="@drawable/edit_text_style"
+                android:inputType="number"
+                android:textAlignment="center"
+                android:textColor="@color/colorMainFont"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/to_spinner_container" />
 
-        <EditText
-            android:id="@+id/to_amount"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/convert_item_height"
-            android:background="@drawable/edit_text_style"
-            android:inputType="number"
-            android:textColor="@color/colorMainFont"
-            android:textSize="32sp"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/to_spinner_container" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </layout>

@@ -18,13 +18,17 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
     private val inputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
 
     private fun insertNewPerson(person: Person) {
-        persons.add(Pair(person, true))
-        adapter.notifyItemInserted(persons.size)
-        adapter.notifyItemChanged(persons.size - 1)
+        if (person.name.isNotEmpty()) {
+            persons.add(Pair(person, true))
+            adapter.notifyDataSetChanged()
+            adapter.notifyItemInserted(persons.size)
+        }
     }
 
-    private fun setupNewPersonView() {
-        setHint(context?.getString(R.string.title_person_hint) ?: "")
+    private fun setupNewPersonView(initialSetup: Boolean) {
+        setHint(context?.getString(R.string.new_person_hint) ?: "")
+        constraintLayout.person_selected.visibility = View.GONE
+        constraintLayout.person_add_button.visibility = View.VISIBLE
         val newPerson = Person("")
         constraintLayout.person_name.doAfterTextChanged {
             newPerson.name = it.toString()
@@ -39,21 +43,32 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
                 false
             }
         }
+
+        constraintLayout.person_add_button.setOnClickListener {
+            insertNewPerson(newPerson)
+        }
+
+        if (!initialSetup) {
+            constraintLayout.person_name.requestFocus()
+        }
     }
 
-    fun setFromIndex(index: Int) {
+    fun setFromIndex(index: Int, initialSetup: Boolean) {
         if (index < persons.size) {
             setPerson(index)
         }
         else {
-            setupNewPersonView()
+            setupNewPersonView(initialSetup)
         }
     }
 
     fun setPerson(index: Int) {
         val (person, isSelected)  = persons[index]
+        setHint(context?.getString(R.string.person_hint) ?: "")
         setPersonName(person.name)
         setSelected(isSelected)
+        constraintLayout.person_selected.visibility = View.VISIBLE
+        constraintLayout.person_add_button.visibility = View.GONE
 
         constraintLayout.person_name.doAfterTextChanged {
             person.name = it.toString()
@@ -74,13 +89,12 @@ class PersonViewHolder(private val context: Context?, private val adapter: Perso
 
     private fun setHint(hint: String) {
         constraintLayout.person_name_layout.hint = hint
-        constraintLayout.person_selected.visibility = View.GONE
-        constraintLayout.person_add_button.visibility = View.VISIBLE
     }
 }
 
 class PersonAdapter(private val context: Context?, private val persons: MutableList<Pair<Person, Boolean>>) :
     RecyclerView.Adapter<PersonViewHolder>() {
+    var initialSetup = true
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
@@ -95,8 +109,14 @@ class PersonAdapter(private val context: Context?, private val persons: MutableL
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
-        holder.setFromIndex(position)
+        holder.setIsRecyclable(false)
+        holder.setFromIndex(position, initialSetup)
+
+        if (position == persons.size) {
+            initialSetup = false
+        }
     }
+
 
     // We need to add 1 to account for the add user item at the end
     override fun getItemCount() = persons.size + 1
