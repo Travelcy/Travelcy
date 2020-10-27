@@ -9,7 +9,6 @@ import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.currency.CurrencyLiveData
-import com.travelcy.travelcy.services.currency.LocalCurrencyIdsLiveData
 import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountLiveData
 import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
@@ -154,35 +153,6 @@ class MediatorLiveDataTests {
 
 
         Assert.assertNull(shouldBeNullCurrency)
-    }
-
-    @Test
-    fun testLocalCurrencyIdsLiveData() {
-        val isConnected = MutableLiveData(true)
-
-        val currency = Currency("ISK", "Króna", 1.0)
-
-        val currencies = MutableLiveData(listOf("ISK", "USD", "NOK"))
-
-        val localCurrency = MutableLiveData(currency)
-
-        val localCurrencyIdsLiveData = LocalCurrencyIdsLiveData(currencies, localCurrency, isConnected)
-
-        val localCurrencyIds = localCurrencyIdsLiveData.blockingObserve()
-
-        Assert.assertNotNull(localCurrencyIds)
-
-        Assert.assertEquals(3, localCurrencyIds?.size)
-
-        isConnected.postValue(false)
-
-        val onlyLocalCurrency = localCurrencyIdsLiveData.blockingObserve()
-
-        Assert.assertNotNull(onlyLocalCurrency)
-
-        Assert.assertEquals(1, onlyLocalCurrency?.size)
-
-        Assert.assertEquals("ISK", onlyLocalCurrency?.get(0))
     }
 
 
