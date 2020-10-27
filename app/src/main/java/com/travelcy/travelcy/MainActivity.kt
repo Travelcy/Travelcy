@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         if (
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
         ) {
             return true
         }
