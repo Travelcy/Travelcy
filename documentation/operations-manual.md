@@ -20,6 +20,8 @@ For every new feature or bug fix you should create a branch based on develop. Wh
 
 When reviewing a pull request, there are certain standards that need to be met. Are coding conventions being met, have relevant tests been created, does everything build and run accordingly, is there redundant code?
 
+Pull request merging is blocked until the test run is successful and at least one reviewer has approved.
+
 ## CI/CD
 Our CI/CD is configured with github actions and fastlane: https://github.com/Travelcy/Travelcy/actions
 https://fastlane.tools/ 
