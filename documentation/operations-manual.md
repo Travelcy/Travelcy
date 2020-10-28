@@ -1,7 +1,7 @@
 # Travelcy Operations Manual
 
 ## Overview
-Travelcy is a native android application developed in Kotlin with Android Studio. The app is divided into 5 layers:
+Travelcy is a native android application developed in Kotlin with Android Studio. Its base functionality is a location aware currency converter and bill splitter (tax and tip included). The app is divided into 5 layers:
 
 ### database (com.travelcy.travelcy.database)
 We created our database with room https://developer.android.com/jetpack/androidx/releases/room so it is persistent and local (data can be fetched offline).
