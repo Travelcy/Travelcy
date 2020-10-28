@@ -23,12 +23,6 @@ The exchange rate is updated automatically by default, but if you wish to turn o
 
 
 ## How to split bill
-Navigate to the Split tab on the bottom of your screen, add/edit/delete the items from your bill and insert their name and cost - you can also add people to an item if you wish to split its cost with them, you can also calculate the tax and add a tipping percentage. When you are done you can clear the bill.
+Navigate to the Split tab on the bottom of your screen, add the items from your bill and insert their name and cost - you can also add people to an item if you wish to split its cost with them, you can also calculate the tax and add a tipping percentage. When you are done you can clear the bill, if you make a mistake simply click on the item and make the change.
 
 [![Split-Screen.png](https://i.postimg.cc/TPcCQpJQ/Split-Screen.png)](https://postimg.cc/sBvYgf8Z)
-
-[![Edit-Bill-Item-Modal.png](https://i.postimg.cc/4xV878KD/Edit-Bill-Item-Modal.png)](https://postimg.cc/CRMC9ss7)
-
-[![Edit-Tip-Modal.png](https://i.postimg.cc/NMfbnBNt/Edit-Tip-Modal.png)](https://postimg.cc/7CdgG88t)
-
-[![Edit-Tax-Modal.png](https://i.postimg.cc/MGw9yyVv/Edit-Tax-Modal.png)](https://postimg.cc/75B14JBk)
