@@ -74,7 +74,7 @@ class SplitFragment : Fragment() {
                     inflater.inflate(R.layout.labeled_item, null) as RelativeLayout
                 labeledView.labeled_item_label.text = person.name
                 labeledView.labeled_item_value.text = personWithPrice.getTotalAmount()
-                if (person.isDefault) {
+                if (person.isDefault && person.budget > 0) {
                     labeledView.budget_remaining.text = personWithPrice.getRemainingFormattedBudget()
                     if (personWithPrice.isOverBudget()) {
                         labeledView.budget_remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorOverBudget))
