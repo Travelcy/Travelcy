@@ -49,7 +49,19 @@ Our fastlane configuration can be found in the fastlane folder under the root of
 
 
 ## Bug reporting
-For bug reporting we use bugsnag https://www.bugsnag.com , it reports unhandled exceptions along with useful details to ease the bugfixing process.
+For bug reporting we use bugsnag https://www.bugsnag.com , it reports unhandled exceptions, counts  along with useful details to ease the bugfixing process.
+By logging in with Travelcys' credentials, you will have an overview of everything bugsnag reports from the app.
+
+We configured bugsnag in Travelcy by following their documentation https://docs.bugsnag.com/platforms/android/
+
+Under manifests/AndroidManifest.xml in the project folder, we configured the API Key necessary to communicate with our BugSnag space
+
+[![Screenshot-2020-10-28-at-16-38-26.png](https://i.postimg.cc/PrTjSvj8/Screenshot-2020-10-28-at-16-38-26.png)](https://postimg.cc/Z072RR0T)
+
+In the MainApplication file, BugSnag is started in the overrided onCreate function
+[![Screenshot-2020-10-28-at-16-41-07.png](https://i.postimg.cc/8P4V9kpX/Screenshot-2020-10-28-at-16-41-07.png)](https://postimg.cc/LnJ7ZpZj)
+
+This gives the app all the default functionality of bugsnag for bug reports.
 
 ## Analytics
 For analytics we use Firebase https://firebase.google.com/ , it gives us useful data on the demographic of our users, retention (do users only use the app for a certain period of time), etc.
