@@ -22,12 +22,17 @@
             </intent-filter>
         </activity>
 
+        <service android:name="MainActivity"
+            android:foregroundServiceType="location"
+            />
+
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
             android:value="3ad67298f1603d719c0e64da9ac3989e" />
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>

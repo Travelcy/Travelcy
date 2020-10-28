@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         locationRequest = LocationRequest.create().apply {
             interval = LOCATION_INTERVAL
             fastestInterval = LOCATION_FASTEST_INTERVAL
-            priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
 
@@ -193,7 +193,7 @@ class MainActivity : AppCompatActivity() {
 
     fun requestLocationPermissions() {
         Log.d(TAG, "requestLocationPermissions")
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_ID)
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_ID)
     }
 
     fun hasLocationPermissions(): Boolean {
