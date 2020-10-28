@@ -11,19 +11,23 @@ class TotalAmountLiveData(
     private val localCurrency: LiveData<Currency>,
     private val foreignCurrency: LiveData<Currency>
 ): MediatorLiveData<String>() {
-    private fun recalculateTotal(billItems: List<BillItemWithPersons>?, currency: com.travelcy.travelcy.model.Currency?) {
-        val localAmount = billItems?.sumByDouble { it.billItem.amount * it.billItem.quantity } ?: 0.0
+    private fun recalculateTotal(billItems: List<BillItemWithPersons>?, localCurrency: Currency?, foreignCurrency: Currency?) {
+        val foreignAmount = billItems?.sumByDouble { it.billItem.amount * it.billItem.quantity } ?: 0.0
 
-        value = FormatUtils.formatPrice(localAmount, localCurrency.value, currency)
+        value = FormatUtils.formatPrice(foreignAmount, localCurrency, foreignCurrency)
     }
 
     init {
+        addSource(localCurrency) {
+            recalculateTotal(billItemsWithPersons.value, it, foreignCurrency.value)
+        }
+
         addSource(foreignCurrency) {
-            recalculateTotal(billItemsWithPersons.value, it)
+            recalculateTotal(billItemsWithPersons.value, localCurrency.value, it)
         }
 
         addSource(billItemsWithPersons) {
-            recalculateTotal(it, foreignCurrency.value)
+            recalculateTotal(it, localCurrency.value, foreignCurrency.value)
         }
     }
 }

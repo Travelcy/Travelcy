@@ -40,18 +40,15 @@ interface BillDao {
     @Insert(onConflict = REPLACE)
     fun addPerson(person: Person): Long
 
-    fun addPersonToBillItem(billItemId: Int, person: Person) {
-        person.billId = billItemId
-        var personId = person.id
-        if (personId == null) {
-            personId = addPerson(person).toInt()
+    fun addPersonToBillItem(billItem: BillItem, person: Person) {
+        if (billItem.id != null && person.id != null) {
+            attatchPersonToBillItem(billItem.id as Int, person.id as Int)
         }
-        attatchPersonToBillItem(billItemId, personId)
     }
 
-    fun removePersonFromBillItem(billItemId: Int, person: Person) {
-        if (person.id != null) {
-            detatchPersonFromBillItem(billItemId, person.id as Int)
+    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
+        if (person.id != null && billItem.id != null) {
+            detatchPersonFromBillItem(billItem.id as Int, person.id as Int)
         }
     }
 

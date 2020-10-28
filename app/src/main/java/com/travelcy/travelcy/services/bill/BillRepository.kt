@@ -14,18 +14,20 @@ class BillRepository (
     val persons = billDao.getAllPersons()
     var defaultPerson = billDao.getDefaultPerson()
 
-    private fun addBillItemToBill(billItem: BillItem): Int {
-        return billDao.addBillItemToBill(billItem).toInt()
+    private fun addBillItemToBill(billItem: BillItem): BillItem {
+        val id = billDao.addBillItemToBill(billItem).toInt()
+        billItem.id = id
+        return billItem
     }
 
     private fun updateBillItem(billItem: BillItem) {
         billDao.updateBillItem(billItem)
     }
 
-    fun upsertBillItem(billItem: BillItem): Int {
+    fun upsertBillItem(billItem: BillItem): BillItem {
         if(billItem.id != null) {
             updateBillItem(billItem)
-            return billItem.id as Int
+            return billItem
         }
 
         return addBillItemToBill(billItem)
@@ -45,21 +47,53 @@ class BillRepository (
         }
     }
 
-    fun addPersonToBillItem(billItemId: Int, person: Person) {
+    fun addPersonToBillItem(billItem: BillItem, person: Person) {
         executor.execute {
-            billDao.addPersonToBillItem(billItemId, person)
+            billDao.addPersonToBillItem(billItem, person)
         }
     }
 
-    fun removePersonFromBillItem(billItemId: Int, person: Person) {
+    fun removePersonFromBillItem(billItem: BillItem, person: Person) {
         executor.execute {
-            billDao.removePersonFromBillItem(billItemId, person)
+            billDao.removePersonFromBillItem(billItem, person)
         }
     }
 
     fun updatePerson(person: Person) {
         executor.execute {
             billDao.updatePerson(person)
+        }
+    }
+
+    fun addPerson(person: Person): Person {
+        val id = billDao.addPerson(person)
+        person.id = id.toInt()
+        return person
+    }
+
+    fun upsertPerson(person: Person): Person {
+        if(person.id != null) {
+            updatePerson(person)
+            return person
+        }
+
+        return addPerson(person)
+    }
+
+    fun saveBillItemWithPersons(billItem: BillItem, persons: List<Pair<Person, Boolean>>) {
+        executor.execute {
+            val upsertedBillItem = upsertBillItem(billItem)
+            syncPersons(persons, upsertedBillItem)
+        }
+    }
+
+    private fun syncPersons(persons: List<Pair<Person, Boolean>>, billItem: BillItem) {
+        executor.execute {
+            persons.forEach {(person, isSelected) ->
+                val upsertedPerson = upsertPerson(person)
+                if (isSelected) addPersonToBillItem(billItem, upsertedPerson)
+                else removePersonFromBillItem(billItem, person)
+            }
         }
     }
 }

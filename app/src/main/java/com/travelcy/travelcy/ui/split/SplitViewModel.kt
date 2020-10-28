@@ -20,10 +20,6 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
 
     val totalAmountPerPerson = TotalAmountPerPersonLiveData(persons, billItemsWithPersons, localCurrency, foreignCurrency)
 
-    fun upsertBillItem(billItem: BillItem): Int {
-        return billRepository.upsertBillItem(billItem)
-    }
-
     fun getOrGenerateBillItem(billItemId: Int?): LiveData<BillItem> {
         if (billItemId != null) {
             return billRepository.getBillItem(billItemId)
@@ -44,16 +40,13 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
         return PersonsForBillItemLiveData(persons, billPersons)
     }
 
-    fun addPersonToBillItem(billItemId: Int, person: Person) {
-        return billRepository.addPersonToBillItem(billItemId, person)
-    }
-
-    fun removePersonFromBillItem(billItemId: Int, person: Person) {
-        return billRepository.removePersonFromBillItem(billItemId, person)
-    }
-
-    fun updatePerson(person: Person) {
-        return billRepository.updatePerson(person)
+    fun saveBillItemWithPersons(billItem: BillItem?, persons: List<Pair<Person, Boolean>>) {
+        if (billItem != null) {
+            return billRepository.saveBillItemWithPersons(billItem, persons)
+        }
+        else {
+            // TODO error handling
+        }
     }
 
     fun formatPrice(amount: Double): String {

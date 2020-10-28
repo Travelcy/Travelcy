@@ -26,15 +26,76 @@
             tools:context=".ui.convert.ConvertFragment">
 
             <RelativeLayout
-                android:id="@+id/from_spinner_container"
+                android:id="@+id/foreign_spinner_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="18dp"
-                app:layout_constraintBottom_toTopOf="@+id/from_amount"
+                app:layout_constraintBottom_toTopOf="@+id/foreign_amount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
+                <Button
+                    android:id="@+id/geo_location_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="24dp"
+                    android:background="@drawable/location" />
 
+                <Spinner
+                    android:id="@+id/foreign_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/convert_item_height"
+                    android:background="@color/colorElevation"
+                    android:popupBackground="@color/colorBackground" />
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="13dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="54dp"
+                    android:background="@drawable/ic_expand_more_24px" />
+            </RelativeLayout>
+
+            <EditText
+                android:id="@+id/foreign_amount"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/convert_item_height"
+                android:layout_marginBottom="40dp"
+                android:background="@drawable/edit_text_style"
+                android:inputType="number"
+                android:textAlignment="center"
+                android:textColor="@color/colorMainFont"
+                android:textSize="32sp"
+                android:selectAllOnFocus="true"
+                android:imeOptions="actionDone"
+                app:layout_constraintBottom_toTopOf="@+id/switch_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/foreign_spinner_container" />
+
+            <Button
+                android:id="@+id/switch_button"
+                android:layout_width="41dp"
+                android:layout_height="48dp"
+                android:background="@drawable/ic_resource_switch"
+                app:layout_constraintBottom_toTopOf="@+id/foreign_spinner_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/foreign_amount" />
+
+            <RelativeLayout
+                android:id="@+id/local_spinner_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toTopOf="@+id/local_amount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/switch_button">
                 <Button
                     android:id="@+id/no_network"
                     android:layout_width="30dp"
@@ -46,14 +107,14 @@
                     android:visibility="gone" />
 
                 <Spinner
-                    android:id="@+id/from_spinner"
+                    android:id="@+id/local_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/convert_item_height"
                     android:background="@color/colorElevation"
                     android:popupBackground="@color/colorBackground" />
 
                 <ImageView
-                    android:id="@+id/from_spinner_dropdown_icon"
+                    android:id="@+id/local_spinner_dropdown_icon"
                     android:layout_width="21dp"
                     android:layout_height="13dp"
                     android:layout_alignParentEnd="true"
@@ -63,68 +124,7 @@
             </RelativeLayout>
 
             <EditText
-                android:id="@+id/from_amount"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/convert_item_height"
-                android:layout_marginBottom="40dp"
-                android:background="@drawable/edit_text_style"
-                android:inputType="number"
-                android:textAlignment="center"
-                android:textColor="@color/colorMainFont"
-                android:textSize="32sp"
-                app:layout_constraintBottom_toTopOf="@+id/switch_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/from_spinner_container" />
-
-            <Button
-                android:id="@+id/switch_button"
-                android:layout_width="41dp"
-                android:layout_height="48dp"
-                android:layout_marginBottom="40dp"
-                android:background="@drawable/ic_resource_switch"
-                app:layout_constraintBottom_toTopOf="@+id/to_spinner_container"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/from_amount" />
-
-            <RelativeLayout
-                android:id="@+id/to_spinner_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="18dp"
-                app:layout_constraintBottom_toTopOf="@+id/to_amount"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/switch_button">
-
-                <Button
-                    android:id="@+id/geo_location_button"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="24dp"
-                    android:background="@drawable/location" />
-
-                <Spinner
-                    android:id="@+id/to_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/convert_item_height"
-                    android:background="@color/colorElevation"
-                    android:popupBackground="@color/colorBackground" />
-
-                <ImageView
-                    android:layout_width="21dp"
-                    android:layout_height="13dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="54dp"
-                    android:background="@drawable/ic_expand_more_24px" />
-            </RelativeLayout>
-
-            <EditText
-                android:id="@+id/to_amount"
+                android:id="@+id/local_amount"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/convert_item_height"
                 android:background="@drawable/edit_text_style"
@@ -132,10 +132,11 @@
                 android:textAlignment="center"
                 android:textColor="@color/colorMainFont"
                 android:textSize="32sp"
+                android:enabled="false"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/to_spinner_container" />
+                app:layout_constraintTop_toBottomOf="@+id/local_spinner_container" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

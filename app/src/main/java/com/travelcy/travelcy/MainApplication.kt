@@ -1,9 +1,6 @@
 package com.travelcy.travelcy
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import com.bugsnag.android.Bugsnag
 import com.travelcy.travelcy.database.TravelcyDatabase
 import com.travelcy.travelcy.services.bill.BillRepository
@@ -23,6 +20,8 @@ class MainApplication : Application() {
     private var billRepository: BillRepository? = null
 
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
+
+    var appLoaded = false
 
     override fun onCreate() {
         super.onCreate()

@@ -53,17 +53,17 @@ class ConvertFragment : Fragment() {
         )
 
         localCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
-        root.from_spinner.adapter = localCurrenciesAdapter
+        root.local_spinner.adapter = localCurrenciesAdapter
 
         foreignCurrenciesAdapter  = ArrayAdapter(activity as Context, R.layout.spinner_item, mutableListOf())
-        root.to_spinner.adapter = foreignCurrenciesAdapter
+        root.foreign_spinner.adapter = foreignCurrenciesAdapter
 
-        root.from_amount.setText(FormatUtils.formatDecimal(convertViewModel.fromAmount.value ?: 1.0))
+        root.foreign_amount.setText(FormatUtils.formatDecimal(convertViewModel.foreignAmount.value ?: 1.0))
 
-        root.from_amount.addTextChangedListener(object : TextWatcher {
+        root.foreign_amount.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (s.isNotEmpty()) {
-                    convertViewModel.updateFromAmount(s.toString())
+                    convertViewModel.updateForeignAmount(s.toString())
                 }
             }
 
@@ -77,8 +77,8 @@ class ConvertFragment : Fragment() {
             }
         })
 
-        convertViewModel.toAmount.observe(viewLifecycleOwner, Observer {
-            root.to_amount.setText(convertViewModel.formatAmount(it))
+        convertViewModel.localAmount.observe(viewLifecycleOwner, Observer {
+            root.local_amount.setText(convertViewModel.formatAmount(it))
         })
 
         convertViewModel.currencyIds.observe(viewLifecycleOwner, Observer {
@@ -89,7 +89,7 @@ class ConvertFragment : Fragment() {
             val localCurrencyIndex = convertViewModel.positionOfLocalCurrency()
 
             if (localCurrencyIndex >= 0) {
-                root.from_spinner.setSelection(localCurrencyIndex)
+                root.local_spinner.setSelection(localCurrencyIndex)
             }
 
             foreignCurrenciesAdapter.clear()
@@ -98,31 +98,31 @@ class ConvertFragment : Fragment() {
 
             val foreignCurrencyindex = convertViewModel.positionOfForeignCurrency()
             if (foreignCurrencyindex >= 0) {
-                root.to_spinner.setSelection(foreignCurrencyindex)
+                root.foreign_spinner.setSelection(foreignCurrencyindex)
             }
         })
 
         convertViewModel.localCurrency.observe(viewLifecycleOwner, Observer {
             val index = convertViewModel.positionOfLocalCurrency()
             if (index >= 0) {
-                root.from_spinner.setSelection(index)
+                root.local_spinner.setSelection(index)
             }
         })
 
         convertViewModel.foreignCurrency.observe(viewLifecycleOwner, Observer {
             val index = convertViewModel.positionOfForeignCurrency()
             if (index >= 0) {
-                root.to_spinner.setSelection(index)
+                root.foreign_spinner.setSelection(index)
             }
         })
 
         convertViewModel.networkConnected.observe(viewLifecycleOwner, Observer {
             root.no_network.visibility = if (it) {View.GONE} else {View.VISIBLE}
-            root.from_spinner_dropdown_icon.visibility = if (it) {View.VISIBLE} else {View.GONE}
-            root.from_spinner.isEnabled = it
+            root.local_spinner_dropdown_icon.visibility = if (it) {View.VISIBLE} else {View.GONE}
+            root.local_spinner.isEnabled = it
         })
 
-        root.from_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
+        root.local_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 if (position != convertViewModel.positionOfLocalCurrency()) {
                     convertViewModel.setLocalCurrency(position)
@@ -133,7 +133,7 @@ class ConvertFragment : Fragment() {
             }
         }
 
-        root.to_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
+        root.foreign_spinner.onItemSelectedListener  = object : AdapterView.OnItemSelectedListener{
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 if (position != convertViewModel.positionOfForeignCurrency()) {
                     convertViewModel.setForeignCurrency(position)
