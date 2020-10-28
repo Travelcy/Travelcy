@@ -8,4 +8,6 @@
     <color name="colorSecondaryFont">#99FFFFFF</color>
     <color name="colorTabBarBackground">#000000</color>
     <color name="colorSeparator">#1FFFFFFF</color>
+    <color name="colorUnderBudget">#43a047</color>
+    <color name="colorOverBudget">#e53935</color>
 </resources>

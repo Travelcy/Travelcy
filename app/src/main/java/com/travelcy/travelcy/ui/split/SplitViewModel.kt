@@ -12,6 +12,7 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
 
     val billItemsWithPersons = billRepository.billItems
     val persons = billRepository.persons
+    val defaultPerson = billRepository.defaultPerson
 
     private val foreignCurrency: LiveData<Currency> = currencyRepository.foreignCurrency
     private val localCurrency: LiveData<Currency> = currencyRepository.localCurrency
@@ -51,6 +52,13 @@ class SplitViewModel(private val billRepository: BillRepository, private val cur
 
     fun formatPrice(amount: Double): String {
         return FormatUtils.formatPrice(amount, localCurrency.value, foreignCurrency.value)
+    }
+
+    fun updateBudget(amount: String) {
+        if (defaultPerson.value != null) {
+            defaultPerson.value!!.budget = amount.toDouble()
+            billRepository.updatePerson(defaultPerson.value!!)
+        }
     }
 
 }

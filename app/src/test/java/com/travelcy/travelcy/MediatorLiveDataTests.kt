@@ -60,9 +60,11 @@ class MediatorLiveDataTests {
 
         val person1 = Person("Test person 1")
         person1.id = 1
+        person1.budget = 5000.0
 
         val person2 = Person("Test person 2")
         person2.id = 2
+        person2.budget = 2000.0
 
         val persons = MutableLiveData(listOf(person1, person2))
 
@@ -80,13 +82,19 @@ class MediatorLiveDataTests {
 
         Assert.assertNotNull(totalAmountPerPersonLiveData)
 
-        totalAmountPerPersonLiveData?.forEachIndexed { index, (person, price) ->
+        totalAmountPerPersonLiveData?.forEachIndexed { index, personWithPrice ->
+            val person = personWithPrice.person
+
             if (index == 0) {
                 Assert.assertEquals("Test person 1", person.name)
-                Assert.assertEquals("$30 / ISK3,000", price)
+                Assert.assertEquals("$30 / ISK3,000", personWithPrice.getTotalAmount())
+                Assert.assertEquals(false, personWithPrice.isOverBudget())
+                Assert.assertEquals("$20 / ISK2,000", personWithPrice.getRemainingFormattedBudget())
             } else if (index == 1) {
                 Assert.assertEquals("Test person 2", person.name)
-                Assert.assertEquals("$25 / ISK2,500", price)
+                Assert.assertEquals("$25 / ISK2,500", personWithPrice.getTotalAmount())
+                Assert.assertEquals(true, personWithPrice.isOverBudget())
+                Assert.assertEquals("($5) / (ISK500)", personWithPrice.getRemainingFormattedBudget())
             }
         }
     }

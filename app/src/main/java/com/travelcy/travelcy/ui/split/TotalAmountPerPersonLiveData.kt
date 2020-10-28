@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import com.travelcy.travelcy.model.BillItemWithPersons
 import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
+import com.travelcy.travelcy.model.PersonWithPrice
 import com.travelcy.travelcy.utils.FormatUtils
 
 class TotalAmountPerPersonLiveData (
@@ -12,7 +13,7 @@ class TotalAmountPerPersonLiveData (
     private val billItemsWithPersons: LiveData<List<BillItemWithPersons>>,
     private val localCurrency: LiveData<Currency>,
     private val foreignCurrency: LiveData<Currency>
-): MediatorLiveData<List<Pair<Person, String>>>() {
+): MediatorLiveData<List<PersonWithPrice>>() {
     private fun recalculateAmountPerPerson(
         persons: List<Person>?,
         billItemsWithPersons: List<BillItemWithPersons>?,
@@ -38,7 +39,7 @@ class TotalAmountPerPersonLiveData (
         value = pricesPerPerson.filter { (_, price) ->
             price > 0
         }.map { (person, price) ->
-            Pair(person, FormatUtils.formatPrice(price, localCurrency.value, foreign))
+            PersonWithPrice(person, price, localCurrency.value, foreignCurrency.value)
         }
     }
 

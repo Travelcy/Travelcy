@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -67,11 +68,22 @@ class SplitFragment : Fragment() {
 
             root.total_per_person_title.visibility = if(it.isEmpty()) { View.GONE } else { View.VISIBLE }
 
-            it.forEach { (person, price) ->
+            it.forEach { personWithPrice ->
+                val person = personWithPrice.person
                 val labeledView: RelativeLayout =
                     inflater.inflate(R.layout.labeled_item, null) as RelativeLayout
                 labeledView.labeled_item_label.text = person.name
-                labeledView.labeled_item_value.text = price
+                labeledView.labeled_item_value.text = personWithPrice.getTotalAmount()
+                if (person.isDefault) {
+                    labeledView.budget_remaining.text = personWithPrice.getRemainingFormattedBudget()
+                    if (personWithPrice.isOverBudget()) {
+                        labeledView.budget_remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorOverBudget))
+                    }
+                    else {
+                        labeledView.budget_remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorUnderBudget))
+                    }
+                    labeledView.budget_wrapper.visibility = View.VISIBLE
+                }
                 totalAmountPerPersonView.addView(labeledView)
             }
         })

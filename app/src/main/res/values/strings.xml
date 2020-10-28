@@ -16,4 +16,5 @@
     <string name="settings_budget_title">Budget</string>
     <string name="settings_budget_amount">Amount</string>
     <string name="settings_currency_list_title">Currencies</string>
+    <string name="budget_remaining">Budget remaining</string>
 </resources>

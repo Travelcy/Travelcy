@@ -35,7 +35,7 @@ class BillItemModal(private val billItemId: Int?, private val splitViewModel: Sp
             val billItemAmount: TextInputEditText = root.bill_item_amount
             val billItemQuantity: TextInputEditText = root.bill_item_quantity
             val recyclerView: RecyclerView = root.bill_item_modal_persons.apply {
-                setHasFixedSize(true)
+                setHasFixedSize(false)
                 layoutManager = viewManager
             }
 
