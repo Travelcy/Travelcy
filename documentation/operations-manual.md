@@ -31,3 +31,6 @@ For bug reporting we use bugsnag https://www.bugsnag.com , it reports unhandled 
 
 ## Analytics
 For analytics we use Firebase https://firebase.google.com/ , it gives us useful data on the demographic of our users, retention (do users only use the app for a certain period of time), etc.
+
+## Ads
+For ads we use Google Admob https://admob.google.com/home/ 
