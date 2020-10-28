@@ -59,6 +59,7 @@ Under manifests/AndroidManifest.xml in the project folder, we configured the API
 [![Screenshot-2020-10-28-at-16-38-26.png](https://i.postimg.cc/PrTjSvj8/Screenshot-2020-10-28-at-16-38-26.png)](https://postimg.cc/Z072RR0T)
 
 In the MainApplication file, BugSnag is started in the overrided onCreate function
+
 [![Screenshot-2020-10-28-at-16-41-07.png](https://i.postimg.cc/8P4V9kpX/Screenshot-2020-10-28-at-16-41-07.png)](https://postimg.cc/LnJ7ZpZj)
 
 This gives the app all the default functionality of bugsnag for bug reports.
