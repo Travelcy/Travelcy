@@ -12,6 +12,7 @@ class BillRepository (
 ) {
     val billItems = billDao.getBillItemsWithPersons()
     val persons = billDao.getAllPersons()
+    var defaultPerson = billDao.getDefaultPerson()
 
     private fun addBillItemToBill(billItem: BillItem): BillItem {
         val id = billDao.addBillItemToBill(billItem).toInt()

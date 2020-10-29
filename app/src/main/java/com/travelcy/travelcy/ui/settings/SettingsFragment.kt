@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -18,7 +21,9 @@ import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.R
+import kotlinx.android.synthetic.main.fragment_convert.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import kotlinx.android.synthetic.main.person_item.view.*
 
 class SettingsFragment : Fragment() {
 
@@ -76,10 +81,21 @@ class SettingsFragment : Fragment() {
 
         val activity: MainActivity = requireActivity() as MainActivity
         val mainApplication: MainApplication =  activity.application as MainApplication
-        settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory(mainApplication.getCurrencyRepository())).get(SettingsViewModel::class.java)
+        settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory(mainApplication.getCurrencyRepository(), mainApplication.getBillRepository())).get(SettingsViewModel::class.java)
 
         val viewManager = LinearLayoutManager(context)
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        settingsViewModel.defaultPerson.observe(viewLifecycleOwner, Observer {
+            root.settings_budget_amount.setText(settingsViewModel.formatAmount(it.budget))
+        })
+
+        root.settings_budget_amount.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE){
+                settingsViewModel.updateBudget(v.text.toString())
+            }
+            false
+        }
 
         val recyclerView: RecyclerView = root.settings_currency_list.apply {
             setHasFixedSize(true)
