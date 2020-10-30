@@ -27,9 +27,9 @@ abstract class TravelcyDatabase : RoomDatabase() {
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE bills ADD COLUMN tipAmount REAL")
-                database.execSQL("ALTER TABLE bills ADD COLUMN tipPercentage REAL")
-                database.execSQL("ALTER TABLE bills ADD COLUMN taxPercentage REAL")
+                database.execSQL("ALTER TABLE bills ADD COLUMN tipPercentage REAL AFTER id")
+                database.execSQL("ALTER TABLE bills ADD COLUMN tipAmount REAL AFTER tipPercentage")
+                database.execSQL("ALTER TABLE bills ADD COLUMN taxPercentage REAL NOT NULL AFTER tipAmount")
             }
         }
 
