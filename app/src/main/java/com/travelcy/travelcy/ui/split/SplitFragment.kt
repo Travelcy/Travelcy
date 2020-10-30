@@ -59,7 +59,7 @@ class SplitFragment : Fragment() {
             }
         })
 
-        splitViewModel.totalAmount.observe(viewLifecycleOwner, Observer {
+        splitViewModel.totalAmountFormatted.observe(viewLifecycleOwner, Observer {
             root.bill_total_amount.text = it
         })
 
@@ -88,6 +88,23 @@ class SplitFragment : Fragment() {
             }
         })
 
+        splitViewModel.tipFormatted.observe(viewLifecycleOwner, Observer {
+            root.bill_tip.text = it
+        })
+
+        splitViewModel.taxFormatted.observe(viewLifecycleOwner, Observer {
+            root.bill_tax.text = it
+        })
+
+        root.bill_tip_button.setOnClickListener {
+            showEditTipModal()
+        }
+
+        root.bill_tax_button.setOnClickListener {
+            showEditTaxModal()
+        }
+
+
         val fab: FloatingActionButton = root.findViewById(R.id.floating_action_button)
 
         fab.setOnClickListener { showEditBillItemDialog(null) }
@@ -113,7 +130,24 @@ class SplitFragment : Fragment() {
 
             newFragment.show(it.supportFragmentManager, "billItemDialog")
         }
+    }
 
+    private fun showEditTipModal() {
+        val fragmentManager = activity?.let {
+
+            val newFragment = TipModal(splitViewModel)
+
+            newFragment.show(it.supportFragmentManager, "tipDialog")
+        }
+    }
+
+    private fun showEditTaxModal() {
+        val fragmentManager = activity?.let {
+
+            val newFragment = TaxModal(splitViewModel)
+
+            newFragment.show(it.supportFragmentManager, "taxDialog")
+        }
     }
 
     companion object {

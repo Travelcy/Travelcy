@@ -17,6 +17,15 @@ interface BillDao {
     @Query("SELECT * FROM bills where id = 1")
     fun getBill(): LiveData<Bill>
 
+    @Query("UPDATE bills set tipAmount = :amount where id = 1")
+    fun setTipAmount(amount: Double?)
+
+    @Query("UPDATE bills set tipPercentage = :percentage where id = 1")
+    fun setTipPercentage(percentage: Double?)
+
+    @Query("UPDATE bills set taxPercentage = :percentage where id = 1")
+    fun setTaxPercentage(percentage: Double)
+
     @Insert(onConflict = REPLACE)
     fun addBillItem(billItem: BillItem): Long
 
