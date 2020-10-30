@@ -86,8 +86,6 @@ class MainActivity : AppCompatActivity() {
 
         mainApplication = application as MainApplication
 
-        Log.e("DEBUG", mainApplication.appLoaded.toString())
-
         if (mainApplication.appLoaded) {
             setupView()
         }
@@ -241,7 +239,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        TravelcyDatabase.getInstance(this).close()
+        TravelcyDatabase.close(this)
 
         super.onDestroy()
     }
