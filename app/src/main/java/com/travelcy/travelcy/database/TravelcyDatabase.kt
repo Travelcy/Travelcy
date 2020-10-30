@@ -29,7 +29,7 @@ abstract class TravelcyDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE bills ADD COLUMN tipPercentage REAL")
                 database.execSQL("ALTER TABLE bills ADD COLUMN tipAmount REAL")
-                database.execSQL("ALTER TABLE bills ADD COLUMN taxPercentage REAL NOT NULL")
+                database.execSQL("ALTER TABLE bills ADD COLUMN taxPercentage REAL NOT NULL DEFAULT 0")
             }
         }
 
