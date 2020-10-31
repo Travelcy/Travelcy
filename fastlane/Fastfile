@@ -25,6 +25,7 @@ platform :android do
 
 	lane :beta do
 		bump_version_code
+		update_version_name
 		gradle(
 			task: 'clean assemble',
 			build_type: 'Release',
