@@ -20,8 +20,8 @@ jobs:
       - id: latest_release
         name: Get Latest Release
         uses: pozetroninc/github-action-get-latest-release@master
-          with:
-            repository: ${{ github.repository }}
+        with:
+          repository: ${{ github.repository }}
       - run: |
           echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
           echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
