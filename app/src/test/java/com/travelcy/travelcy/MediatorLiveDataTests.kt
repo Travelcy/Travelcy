@@ -10,9 +10,7 @@ import com.travelcy.travelcy.model.Currency
 import com.travelcy.travelcy.model.Person
 import com.travelcy.travelcy.services.currency.CurrencyLiveData
 import com.travelcy.travelcy.ui.convert.LocalAmountLiveData
-import com.travelcy.travelcy.ui.split.PersonsForBillItemLiveData
-import com.travelcy.travelcy.ui.split.TotalAmountLiveData
-import com.travelcy.travelcy.ui.split.TotalAmountPerPersonLiveData
+import com.travelcy.travelcy.ui.split.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -33,18 +31,13 @@ class MediatorLiveDataTests {
 
     @Test
     fun testTotalAmountLiveData() {
-        val localCurrency = MutableLiveData(Currency("ISK", "Króna", 1.0))
-        val foreignCurrency = MutableLiveData(Currency("USD", "Dollar", 0.01))
+        val totalAmount = MutableLiveData(100.0)
+        val tax = MutableLiveData(20.0)
+        val tip = MutableLiveData(10.0)
 
-        val billItem1 = BillItem("Pizza", 10.0, 2)
+        val totalAmountLiveData = TotalAmountLiveData(totalAmount, tax, tip).blockingObserve()
 
-        val billItem2 = BillItem("Beer", 5.0, 4)
-
-        val billItemWithPersons = MutableLiveData(listOf(BillItemWithPersons(billItem1, emptyList()), BillItemWithPersons(billItem2, emptyList())))
-
-        val totalAmountLiveData = TotalAmountLiveData(billItemWithPersons, localCurrency, foreignCurrency).blockingObserve()
-
-        Assert.assertEquals("$40 / ISK4,000", totalAmountLiveData)
+        Assert.assertEquals(130.0, totalAmountLiveData)
     }
 
     @Test
@@ -78,7 +71,11 @@ class MediatorLiveDataTests {
 
         val billItemWithPersons = MutableLiveData(listOf(billItem1, billItem2, billItem3))
 
-        val totalAmountPerPersonLiveData = TotalAmountPerPersonLiveData(persons, billItemWithPersons, localCurrency, foreignCurrency).blockingObserve()
+        val tipPercentage = MutableLiveData(0.2)
+
+        val taxPercentage = MutableLiveData<Double?>(null)
+
+        val totalAmountPerPersonLiveData = TotalAmountPerPersonLiveData(persons, billItemWithPersons, tipPercentage, taxPercentage, localCurrency, foreignCurrency).blockingObserve()
 
         Assert.assertNotNull(totalAmountPerPersonLiveData)
 
@@ -87,14 +84,14 @@ class MediatorLiveDataTests {
 
             if (index == 0) {
                 Assert.assertEquals("Test person 1", person.name)
-                Assert.assertEquals("$30 / ISK3,000", personWithPrice.getTotalAmount())
+                Assert.assertEquals("$36 / ISK3,600", personWithPrice.getTotalAmount())
                 Assert.assertEquals(false, personWithPrice.isOverBudget())
-                Assert.assertEquals("$20 / ISK2,000", personWithPrice.getRemainingFormattedBudget())
+                Assert.assertEquals("$14 / ISK1,400", personWithPrice.getRemainingFormattedBudget())
             } else if (index == 1) {
                 Assert.assertEquals("Test person 2", person.name)
-                Assert.assertEquals("$25 / ISK2,500", personWithPrice.getTotalAmount())
+                Assert.assertEquals("$30 / ISK3,000", personWithPrice.getTotalAmount())
                 Assert.assertEquals(true, personWithPrice.isOverBudget())
-                Assert.assertEquals("($5) / (ISK500)", personWithPrice.getRemainingFormattedBudget())
+                Assert.assertEquals("($10) / (ISK1,000)", personWithPrice.getRemainingFormattedBudget())
             }
         }
     }
@@ -189,6 +186,53 @@ class MediatorLiveDataTests {
         Assert.assertEquals(100.0, localAmount3)
     }
 
+    @Test
+    fun testAddPercentageLiveData() {
+        val total = MutableLiveData(100.0)
+
+        val percentage = MutableLiveData(0.2)
+
+        val percentageValueLiveData = PercentageLiveData(total, percentage)
+
+        val percentagevalue = percentageValueLiveData.blockingObserve()
+
+        Assert.assertEquals(20.0, percentagevalue)
+
+        percentage.postValue(0.5)
+
+        val percentagevalue2 = percentageValueLiveData.blockingObserve()
+
+        Assert.assertEquals(50.0, percentagevalue2)
+
+        total.postValue(200.0)
+
+        val percentagevalue3 = percentageValueLiveData.blockingObserve()
+
+        Assert.assertEquals(100.0, percentagevalue3)
+    }
+
+    @Test
+    fun testTipPercentageLiveData() {
+        val foreignTotal = MutableLiveData(100.0)
+
+        val billTipPercentage = MutableLiveData<Double?>(0.2)
+
+        val billTipAmount = MutableLiveData<Double?>(null)
+
+        val tipPercentageLiveData = TipPercentageLiveData(foreignTotal, billTipPercentage, billTipAmount)
+
+        val tipPercentage = tipPercentageLiveData.blockingObserve()
+
+        Assert.assertEquals(0.2, tipPercentage)
+
+        billTipAmount.postValue(10.0)
+
+        billTipPercentage.postValue(0.0)
+
+        val tipPercentage2 = tipPercentageLiveData.blockingObserve()
+
+        Assert.assertEquals(0.1, tipPercentage2)
+    }
 
     private fun <T> LiveData<T>.blockingObserve(): T? {
         var value: T? = null

@@ -10,6 +10,7 @@ class BillRepository (
     private val billDao: BillDao,
     private val executor: Executor
 ) {
+    val bill = billDao.getBill()
     val billItems = billDao.getBillItemsWithPersons()
     val persons = billDao.getAllPersons()
     var defaultPerson = billDao.getDefaultPerson()
@@ -94,6 +95,24 @@ class BillRepository (
                 if (isSelected) addPersonToBillItem(billItem, upsertedPerson)
                 else removePersonFromBillItem(billItem, person)
             }
+        }
+    }
+
+    fun setTipAmount(amount: Double?) {
+        executor.execute {
+            billDao.setTipAmount(amount)
+        }
+    }
+
+    fun setTipPercentage(percentage: Double?) {
+        executor.execute {
+            billDao.setTipPercentage(percentage)
+        }
+    }
+
+    fun setTaxPercentage(percentage: Double) {
+        executor.execute {
+            billDao.setTaxPercentage(percentage)
         }
     }
 }
