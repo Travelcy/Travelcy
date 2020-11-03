@@ -15,9 +15,7 @@ jobs:
           node-version: '12'
       - id: latest_release
         name: Get Latest Release
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          repository: ${{ github.repository }}
+        uses: thebritican/fetch-latest-release@v1
       - run: |
           echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
           echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
@@ -29,7 +27,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          VERSION_NAME: ${{ steps.latest_release.outputs.release }}
+          VERSION_NAME: ${{ steps.latest_release.outputs.tag_name }}
         uses: maierj/fastlane-action@v1.4.0
         with:
           lane: 'android beta'
