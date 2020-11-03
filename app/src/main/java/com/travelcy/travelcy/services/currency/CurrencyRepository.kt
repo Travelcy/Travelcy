@@ -124,7 +124,13 @@ class CurrencyRepository (
         }
     }
 
-    fun updateCurrencies(baseCurrencyCode: String) {
+    fun refreshCurrencies() {
+        executor.execute {
+            updateCurrencies(settingsDao.getSettingsRaw().localCurrencyCode!!)
+        }
+    }
+
+    private fun updateCurrencies(baseCurrencyCode: String) {
         Log.d(TAG,"Update currencies (currencyBase: $baseCurrencyCode)")
 
         if (loadingCurrencies)

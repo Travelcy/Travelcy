@@ -9,6 +9,7 @@ import com.travelcy.travelcy.database.TravelcyDatabase
 import com.travelcy.travelcy.services.bill.BillRepository
 import com.travelcy.travelcy.services.currency.CurrencyRepository
 import com.travelcy.travelcy.services.currency.CurrencyWebService
+import com.travelcy.travelcy.services.settings.SettingsRepository
 import com.travelcy.travelcy.workers.ExchangeRateUpdateWorker
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -24,6 +25,8 @@ class MainApplication : Application() {
 
     private var billRepository: BillRepository? = null
 
+    private var settingsRepository: SettingsRepository? = null
+
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
 
     var appLoaded = false
@@ -37,12 +40,14 @@ class MainApplication : Application() {
             val database = TravelcyDatabase.getInstance(this)
             val settingsDao = database.settingsDao()
 
+            WorkManager.getInstance(this).cancelAllWork()
+
             if (settingsDao.getSettingsRaw().autoUpdateExchangeRates) {
-                val exhanageRateUpdateRequest = PeriodicWorkRequestBuilder<ExchangeRateUpdateWorker>(1, TimeUnit.DAYS).build()
+                val exchangeRateUpdateRequest = PeriodicWorkRequestBuilder<ExchangeRateUpdateWorker>(1, TimeUnit.DAYS).build()
 
                 WorkManager
                     .getInstance(this)
-                    .enqueueUniquePeriodicWork(ExchangeRateUpdateWorker.WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, exhanageRateUpdateRequest);
+                    .enqueueUniquePeriodicWork(ExchangeRateUpdateWorker.WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, exchangeRateUpdateRequest);
             }
         }
     }
@@ -75,6 +80,15 @@ class MainApplication : Application() {
         }
 
         return billRepository as BillRepository
+    }
+
+    fun getSettingsRepository(): SettingsRepository {
+        if (settingsRepository == null) {
+            val database = TravelcyDatabase.getInstance(this)
+            settingsRepository = SettingsRepository(database.settingsDao(), executorService)
+        }
+
+        return settingsRepository as SettingsRepository
     }
 
     fun getExecutor(): Executor {

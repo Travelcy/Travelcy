@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.travelcy.travelcy.MainApplication
-import com.travelcy.travelcy.database.TravelcyDatabase
 import java.lang.Exception
 
 class ExchangeRateUpdateWorker (appContext: Context, workerParams: WorkerParameters):
@@ -13,16 +12,14 @@ class ExchangeRateUpdateWorker (appContext: Context, workerParams: WorkerParamet
     override fun doWork(): Result {
         try {
             val application = applicationContext as MainApplication
-            val database = TravelcyDatabase.getInstance(application)
-            val settingsDao = database.settingsDao()
 
-            application.getCurrencyRepository().updateCurrencies(settingsDao.getSettingsRaw().localCurrencyCode!!)
+            application.getCurrencyRepository().refreshCurrencies()
 
             return Result.success()
         }
-        catch (e: Exception){
-            return Result.failure()
-        }
+        catch (e: Exception){}
+
+        return Result.failure()
     }
 
     companion object {

@@ -1,19 +1,19 @@
 package com.travelcy.travelcy.ui.settings
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -21,9 +21,8 @@ import com.google.firebase.ktx.Firebase
 import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.R
-import kotlinx.android.synthetic.main.fragment_convert.view.*
+import com.travelcy.travelcy.workers.ExchangeRateUpdateWorker
 import kotlinx.android.synthetic.main.fragment_settings.view.*
-import kotlinx.android.synthetic.main.person_item.view.*
 
 class SettingsFragment : Fragment() {
 
@@ -37,9 +36,11 @@ class SettingsFragment : Fragment() {
         val simpleItemTouchCallback =
             object : ItemTouchHelper.SimpleCallback(UP or DOWN or START or END, 0) {
 
-                override fun onMove(recyclerView: RecyclerView,
-                                    viewHolder: RecyclerView.ViewHolder,
-                                    target: RecyclerView.ViewHolder): Boolean {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
 
                     val adapter = recyclerView.adapter as SettingsCurrenciesAdapter
                     val from = viewHolder.adapterPosition
@@ -52,8 +53,10 @@ class SettingsFragment : Fragment() {
 
                     return true
                 }
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder,
-                                      direction: Int) {
+                override fun onSwiped(
+                    viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
                     // 4. Code block for horizontal swipe.
                     //    ItemTouchHelper handles horizontal swipe as well, but
                     //    it is not relevant with reordering. Ignoring here.
@@ -73,18 +76,40 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         firebaseAnalytics = Firebase.analytics
 
         val activity: MainActivity = requireActivity() as MainActivity
         val mainApplication: MainApplication =  activity.application as MainApplication
-        settingsViewModel = ViewModelProvider(this, SettingsViewModelFactory(mainApplication.getCurrencyRepository(), mainApplication.getBillRepository())).get(SettingsViewModel::class.java)
+        settingsViewModel = ViewModelProvider(
+            this, SettingsViewModelFactory(
+                mainApplication.getCurrencyRepository(),
+                mainApplication.getBillRepository(),
+                mainApplication.getSettingsRepository()
+            )
+        ).get(SettingsViewModel::class.java)
 
         val viewManager = LinearLayoutManager(context)
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        settingsViewModel.autoUpdateExchangeRates.observe(viewLifecycleOwner, Observer {
+            root.settings_auto_update.isChecked = it
+
+            if (!it) {
+                WorkManager.getInstance(mainApplication).cancelUniqueWork(ExchangeRateUpdateWorker.WORK_NAME)
+            }
+        })
+
+        root.settings_auto_update.setOnCheckedChangeListener { buttonView, isChecked -> settingsViewModel.updateAutoUpdateExchangeRates(isChecked) }
+
+        settingsViewModel.exchangeRatesLastUpdated.observe(viewLifecycleOwner, Observer {
+            root.settings_last_updated.text = getString(R.string.settings_last_updated, DateFormat.format("MMMM d HH:mm", it * 1000))
+        })
+
+        root.settings_update_now.setOnClickListener { settingsViewModel.refreshCurrencies() }
 
         settingsViewModel.defaultPerson.observe(viewLifecycleOwner, Observer {
             root.settings_budget_amount.setText(settingsViewModel.formatAmount(it.budget))

@@ -32,4 +32,10 @@ interface SettingsDao {
 
     @Query("SELECT * FROM settings where id = 1")
     fun getSettings(): LiveData<Settings>
+
+    @Query("SELECT exchangeRatesLastUpdated FROM settings where id = 1")
+    fun getExchangeRatesLastUpdated(): LiveData<Long>
+
+    @Query("SELECT autoUpdateExchangeRates FROM settings where id = 1")
+    fun getAutoUpdateExchangeRates(): LiveData<Boolean>
 }
