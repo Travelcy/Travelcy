@@ -113,6 +113,21 @@ class SettingsDaoMock: SettingsDao {
         return _settings
     }
 
+    override fun updateExchangeRatesLastUpdated(exchangeRatesLastUpdated: Long) {
+        // Do nothing
+    }
+
+    override fun updateAutoUpdateExchangeRates(autoUpdateExchangeRates: Boolean) {
+        // Do nothing
+    }
+
+    override fun getExchangeRatesLastUpdated(): LiveData<Long> {
+        return MutableLiveData<Long>(System.currentTimeMillis() / 1000);
+    }
+
+    override fun getAutoUpdateExchangeRates(): LiveData<Boolean> {
+        return MutableLiveData<Boolean>(true);
+    }
 }
 
 class SynchronousExecutor : Executor {

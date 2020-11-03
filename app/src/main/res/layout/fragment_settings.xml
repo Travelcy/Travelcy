@@ -12,6 +12,61 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/settings_update_title"
+        android:textColor="@color/colorMainFont"
+        android:textSize="24sp"
+        android:paddingHorizontal="32dp"
+        android:paddingBottom="16dp"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:paddingHorizontal="32dp"
+        android:layout_height="wrap_content">
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/settings_auto_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/settings_auto_update"
+            android:textSize="16sp"
+            android:layout_marginStart="20dp"
+            android:textColor="@color/colorMainFont"
+            android:text="@string/settings_auto_update"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/settings_last_updated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_last_updated"
+        android:textColor="@color/colorMainFont"
+        android:textSize="16sp"
+        android:paddingHorizontal="32dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:textAlignment="center"
+        />
+
+    <Button
+        android:id="@+id/settings_update_now"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/settings_update_now"
+        android:layout_marginBottom="16dp"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/settings_budget_title"
         android:textColor="@color/colorMainFont"
         android:textSize="24sp"
