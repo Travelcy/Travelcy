@@ -15,7 +15,15 @@ jobs:
           node-version: '12'
       - id: latest_release
         name: Get Latest Release
-        uses: thebritican/fetch-latest-release@v2.0.0
+        shell: bash
+        run: |
+          release_json=$(curl -H "Authorization: token ${{ github.token }}" https://api.github.com/repos/${{ github.repository }}/releases)
+          version=$(echo "$release_json" | jq -r '.[0].tag_name')
+          published_at=$(echo "$release_json" | jq -r '.[0].published_at')
+          echo "version: $version"
+          echo "latest_tag_published_at: $published_at"
+          echo ::set-output name=version::"$version"
+          echo ::set-output name=published_at::"$published_at"
       - run: |
           echo "${{ secrets.GOOGLE_JSON_KEY }}" | base64 --decode > api-google-key.json
           echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" | base64 --decode > android.keystore
@@ -27,7 +35,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          VERSION_NAME: ${{ steps.latest_release.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.latest_release.outputs.version }}
         uses: maierj/fastlane-action@v1.4.0
         with:
           lane: 'android beta'
