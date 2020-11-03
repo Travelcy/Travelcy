@@ -124,7 +124,7 @@ class CurrencyRepository (
         }
     }
 
-    private fun updateCurrencies(baseCurrencyCode: String) {
+    fun updateCurrencies(baseCurrencyCode: String) {
         Log.d(TAG,"Update currencies (currencyBase: $baseCurrencyCode)")
 
         if (loadingCurrencies)
@@ -189,6 +189,8 @@ class CurrencyRepository (
                     }
 
                     currenciesLoaded.postValue(true)
+
+                    settingsDao.updateExchangeRatesLastUpdated(System.currentTimeMillis() / 1000)
                 }
             }
             catch (exception: Exception) {

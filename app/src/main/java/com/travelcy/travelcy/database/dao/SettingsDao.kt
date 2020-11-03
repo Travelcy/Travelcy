@@ -18,6 +18,12 @@ interface SettingsDao {
     @Query("UPDATE settings set foreignCurrencyCode = :foreignCurrencyCode where id = 1")
     fun updateForeignCurrencyCode(foreignCurrencyCode: String)
 
+    @Query("UPDATE settings set exchangeRatesLastUpdated = :exchangeRatesLastUpdated where id = 1")
+    fun updateExchangeRatesLastUpdated(exchangeRatesLastUpdated: Long)
+
+    @Query("UPDATE settings set autoUpdateExchangeRates = :autoUpdateExchangeRates where id = 1")
+    fun updateAutoUpdateExchangeRates(autoUpdateExchangeRates: Boolean)
+
     @Query("SELECT COUNT(*) FROM settings where id = 1")
     fun hasSettings(): Boolean
 

@@ -13,7 +13,7 @@ import com.travelcy.travelcy.database.dao.SettingsDao
 import com.travelcy.travelcy.model.*
 import java.util.concurrent.Executors
 
-@Database(entities = [Currency::class, Settings::class, Bill::class, BillItem::class, Person::class, PersonBillItemCrossRef::class], version = 2)
+@Database(entities = [Currency::class, Settings::class, Bill::class, BillItem::class, Person::class, PersonBillItemCrossRef::class], version = 3)
 abstract class TravelcyDatabase : RoomDatabase() {
     abstract fun currencyDao(): CurrencyDao
 
@@ -30,6 +30,13 @@ abstract class TravelcyDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE bills ADD COLUMN tipPercentage REAL")
                 database.execSQL("ALTER TABLE bills ADD COLUMN tipAmount REAL")
                 database.execSQL("ALTER TABLE bills ADD COLUMN taxPercentage REAL NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE settings ADD COLUMN exchangeRatesLastUpdated INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE settings ADD COLUMN autoUpdateExchangeRates INTEGER NOT NULL DEFAULT 1")
             }
         }
 
@@ -54,6 +61,7 @@ abstract class TravelcyDatabase : RoomDatabase() {
                     )
                         .addCallback(seedInitialData(context))
                         .addMigrations(MIGRATION_1_2)
+                        .addMigrations(MIGRATION_2_3)
                         .build()
                     INSTANCE = instance
                 }
