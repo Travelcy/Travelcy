@@ -19,10 +19,13 @@ import com.travelcy.travelcy.R
 import kotlinx.android.synthetic.main.fragment_convert.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.ads.AdRequest
 import com.travelcy.travelcy.MainActivity
 import com.travelcy.travelcy.MainApplication
 import com.travelcy.travelcy.databinding.FragmentConvertBinding
 import com.travelcy.travelcy.utils.FormatUtils
+import kotlinx.android.synthetic.*
+import com.google.android.gms.ads.AdView as AdView
 
 class ConvertFragment : Fragment() {
 
@@ -34,11 +37,15 @@ class ConvertFragment : Fragment() {
     private lateinit var foreignCurrenciesAdapter: ArrayAdapter<String>
     private lateinit var localCurrenciesAdapter: ArrayAdapter<String>
 
+    private lateinit var mAdView: AdView
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+
+
         firebaseAnalytics = Firebase.analytics
         val activity: MainActivity = requireActivity() as MainActivity
         val mainApplication: MainApplication =  activity.application as MainApplication
@@ -153,6 +160,11 @@ class ConvertFragment : Fragment() {
         }
 
         binding.root.setOnClickListener{switch()}
+
+        mAdView = root.adView
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
 
         return root
     }
