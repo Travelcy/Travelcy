@@ -1,5 +1,6 @@
 package com.travelcy.travelcy.services.settings
 
+import androidx.lifecycle.Transformations
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -14,7 +15,7 @@ class SettingsRepository(
     private val executor: Executor
 ) {
     val exchangeRatesLastUpdated = settingsDao.getExchangeRatesLastUpdated()
-    val autoUpdateExchangeRates = settingsDao.getAutoUpdateExchangeRates()
+    val autoUpdateExchangeRates = Transformations.distinctUntilChanged(settingsDao.getAutoUpdateExchangeRates())
 
     init {
         autoUpdateExchangeRates.observeForever {
