@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -31,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private var updateOnNextLocationUpdate = false
     lateinit var connectivityManager: ConnectivityManager
     private lateinit var mainApplication: MainApplication
+
+
 
     init {
         instance = this
@@ -84,6 +89,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        MobileAds.initialize(this) {}
+
         mainApplication = application as MainApplication
 
         if (mainApplication.appLoaded) {
@@ -124,6 +131,10 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         setTheme(R.style.AppTheme)
+
+        val adView: AdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onResume() {
