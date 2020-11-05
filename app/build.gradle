@@ -104,4 +104,5 @@ dependencies {
 
     // Ad dependency
     implementation 'com.google.android.gms:play-services-ads:19.5.0'
+    implementation 'com.google.firebase:firebase-ads:19.1.0'
 }

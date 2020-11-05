@@ -131,6 +131,10 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         setTheme(R.style.AppTheme)
+
+        val adView: AdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onResume() {
