@@ -28,7 +28,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+        ads:adUnitId="ca-app-pub-2050943296819695/9008041615">
         <!--
        Live ad id
         ads:adUnitId="ca-app-pub-2050943296819695/9008041615">
