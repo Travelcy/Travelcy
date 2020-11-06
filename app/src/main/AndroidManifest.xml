@@ -29,6 +29,10 @@
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
             android:value="3ad67298f1603d719c0e64da9ac3989e" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2050943296819695~7527933827"/>
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />

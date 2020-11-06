@@ -17,7 +17,6 @@
         android:clipToPadding="false"
         android:scrollbars="none"
         android:padding="32dp"
-        android:layout_marginBottom="30dp"
         android:overScrollMode="ifContentScrolls">
 
         <androidx.constraintlayout.widget.ConstraintLayout

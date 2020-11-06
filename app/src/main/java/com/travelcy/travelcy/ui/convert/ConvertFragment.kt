@@ -39,6 +39,8 @@ class ConvertFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+
+
         firebaseAnalytics = Firebase.analytics
         val activity: MainActivity = requireActivity() as MainActivity
         val mainApplication: MainApplication =  activity.application as MainApplication
@@ -153,6 +155,7 @@ class ConvertFragment : Fragment() {
         }
 
         binding.root.setOnClickListener{switch()}
+
 
         return root
     }

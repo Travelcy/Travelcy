@@ -11,12 +11,14 @@ import com.travelcy.travelcy.model.Currency
 import kotlinx.android.synthetic.main.settings_currency_list_item.view.*
 import java.util.*
 
-class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout, private val settingsViewModel: SettingsViewModel): RecyclerView.ViewHolder(constraintLayout) {
+class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout, private val adapter: SettingsCurrenciesAdapter): RecyclerView.ViewHolder(constraintLayout) {
     var size = 0
     var _currency: Currency? = null
+    var _position: Int? = null
 
-    fun setCurrency(currency: Currency) {
+    fun setCurrency(currency: Currency, position: Int) {
         _currency = currency
+        _position = position
 
         itemView.settings_currency_list_title.text = "${currency.id} (${currency.name})";
 
@@ -24,18 +26,20 @@ class SettingsCurrenciesViewHolder(private val constraintLayout: RelativeLayout,
     }
 
     fun setEnabled(enabled: Boolean) {
-        if (_currency != null) {
+        if (_currency != null && _position != null) {
             if (_currency!!.enabled != enabled) {
                 _currency!!.enabled = enabled
 
+                adapter.currencies.removeAt(_position!!)
+
                 if (!enabled) {
-                    _currency?.sort = size
+                    adapter.currencies.add(_currency!!)
                 }
                 else {
-                    _currency?.sort = 1
+                    adapter.currencies.add(1, _currency!!)
                 }
 
-                settingsViewModel.updateCurrency(_currency!!)
+                adapter.saveSort()
             }
         }
     }
@@ -56,7 +60,7 @@ class SettingsCurrenciesAdapter(
             .inflate(R.layout.settings_currency_list_item, parent, false) as RelativeLayout
         // set the view's size, margins, paddings and layout parameters
 
-        val viewHolder = SettingsCurrenciesViewHolder(personLayout, settingsViewModel)
+        val viewHolder = SettingsCurrenciesViewHolder(personLayout, this)
 
         viewHolder.setIsRecyclable(false);
 
@@ -77,7 +81,7 @@ class SettingsCurrenciesAdapter(
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: SettingsCurrenciesViewHolder, position: Int) {
         holder.size = currencies.size
-        holder.setCurrency(currencies[position])
+        holder.setCurrency(currencies[position], position)
     }
 
     override fun getItemCount() = currencies.size

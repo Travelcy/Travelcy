@@ -108,4 +108,22 @@ Here you can see an example of how we use firebase - everytime a user enters the
 
 
 ## Ads
-For ads we use Google Admob https://admob.google.com/home/ 
+For ads we use Google Admob https://admob.google.com/home/, ads are our source of revenue. Currently we have one configured one ad displayed in all of the screens in the least obtrusive way we could think of, see the image below.
+
+[![Screenshot-2020-11-06-at-19-40-31.png](https://i.postimg.cc/DZvn2TgQ/Screenshot-2020-11-06-at-19-40-31.png)](https://postimg.cc/p96gZ33y)
+
+To understand how we configured Google Admob for the project, see the images below - they show the steps we took.
+
+[![Screenshot-2020-11-06-at-19-43-07.png](https://i.postimg.cc/dQmvhDX2/Screenshot-2020-11-06-at-19-43-07.png)](https://postimg.cc/bdJ4MYqr)
+
+[![Screenshot-2020-11-06-at-19-47-26.png](https://i.postimg.cc/tCBjzw97/Screenshot-2020-11-06-at-19-47-26.png)](https://postimg.cc/1fV2mWnZ)
+
+[![Screenshot-2020-11-06-at-19-51-02.png](https://i.postimg.cc/prxH0t95/Screenshot-2020-11-06-at-19-51-02.png)](https://postimg.cc/TLkFwFJT)
+
+[![Screenshot-2020-11-06-at-19-54-32.png](https://i.postimg.cc/VvRcpHMG/Screenshot-2020-11-06-at-19-54-32.png)](https://postimg.cc/BPXy1pmH)
+
+[![Screenshot-2020-11-06-at-19-56-02.png](https://i.postimg.cc/WbNVgTLQ/Screenshot-2020-11-06-at-19-56-02.png)](https://postimg.cc/8s0xV8CH)
+
+And the image below shows our google admob portal
+
+[![image-3.png](https://i.postimg.cc/Y9Q7fSSw/image-3.png)](https://postimg.cc/Q9Nvjh56)
