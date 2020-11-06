@@ -27,6 +27,8 @@ class MainApplication : Application() {
 
     private var settingsRepository: SettingsRepository? = null
 
+    private lateinit var workManager: WorkManager;
+
     private val executorService: ExecutorService = Executors.newFixedThreadPool(4)
 
     var appLoaded = false
@@ -36,20 +38,7 @@ class MainApplication : Application() {
 
         Bugsnag.start(this)
 
-        executorService.execute {
-            val database = TravelcyDatabase.getInstance(this)
-            val settingsDao = database.settingsDao()
-
-            WorkManager.getInstance(this).cancelAllWork()
-
-            if (settingsDao.getSettingsRaw().autoUpdateExchangeRates) {
-                val exchangeRateUpdateRequest = PeriodicWorkRequestBuilder<ExchangeRateUpdateWorker>(1, TimeUnit.DAYS).build()
-
-                WorkManager
-                    .getInstance(this)
-                    .enqueueUniquePeriodicWork(ExchangeRateUpdateWorker.WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, exchangeRateUpdateRequest);
-            }
-        }
+        workManager = WorkManager.getInstance(this)
     }
 
     fun getCurrencyWebService(): CurrencyWebService {
@@ -85,14 +74,10 @@ class MainApplication : Application() {
     fun getSettingsRepository(): SettingsRepository {
         if (settingsRepository == null) {
             val database = TravelcyDatabase.getInstance(this)
-            settingsRepository = SettingsRepository(database.settingsDao(), executorService)
+            settingsRepository = SettingsRepository(database.settingsDao(), workManager, executorService)
         }
 
         return settingsRepository as SettingsRepository
-    }
-
-    fun getExecutor(): Executor {
-        return executorService
     }
 
     companion object {
